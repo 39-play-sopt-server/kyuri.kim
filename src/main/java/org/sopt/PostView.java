@@ -4,8 +4,8 @@ package org.sopt;
 게시판 데이터의 조회 뿐 아니라 각종 입력 메시지와 결과 출력도 포함되어야 하죠
 */
 
-import javax.sound.sampled.Port;
-import java.util.ArrayList;
+import org.sopt.domain.Post;
+
 import java.util.List;
 import java.util.Scanner;
 

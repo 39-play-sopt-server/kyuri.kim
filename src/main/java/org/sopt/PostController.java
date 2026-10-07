@@ -4,6 +4,8 @@ package org.sopt;
 사용자의 메뉴 선택에 맞는 기능을 제공하면서 model과 view에 결과를 반영하면 됩니다
 */
 
+import org.sopt.domain.Post;
+
 import java.util.ArrayList;
 import java.util.List;
 

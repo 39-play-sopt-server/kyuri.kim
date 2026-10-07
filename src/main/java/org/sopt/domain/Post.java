@@ -1,11 +1,8 @@
-package org.sopt;
-
-/* 얘는 Model 역할을 합니다 (게시판 내용의 데이터를 관리, 검증하며 비즈니스 로직에 따라 처리함)
-*/
+package org.sopt.domain;
 
 public class Post {
-    String title;
-    String content;
+    private String title;
+    private String content;
 
     public Post(String title, String content) {
         //아래의 3번에서 말했던 유효성 검증은 여기 들어가면 되겠죠.!
