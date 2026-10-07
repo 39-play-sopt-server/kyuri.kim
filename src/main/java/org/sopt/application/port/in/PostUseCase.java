@@ -1,6 +1,9 @@
 package org.sopt.application.port.in;
 
-//이 시스템이 제공하는 기능에 대한 인터페이스 파일
+//인바운드 포트 (유스케이스) | "게시글을 작성한다"
 
-public class PostUseCase {
+import org.sopt.adapter.in.dto.PostDetailResponseDto;
+
+public interface PostUseCase {
+    PostDetailResponseDto createPost(CreatePostCommand command);
 }

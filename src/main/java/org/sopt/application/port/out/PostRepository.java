@@ -1,6 +1,9 @@
 package org.sopt.application.port.out;
 
-//코어가 저장소에 바라는 것에 대한 인터페이스
+//아웃바운드 포트 (repository 인터페이스) | "게시글을 저장한다"는 인터페이스 정의
 
-public class PostRepository {
+import org.sopt.domain.Post;
+
+public interface PostRepository {
+    Post save(Post post);
 }
