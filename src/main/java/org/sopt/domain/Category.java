@@ -3,25 +3,26 @@ package org.sopt.domain;
 import java.util.Arrays;
 
 public enum Category {
-    FREE("FREE", "자유게시판"),
-    INFORMATION("IMFO", "정보게시판"),
-    CAREER("CAREER", "취업 게시판");
+    FREE("자유게시판"),
+    INFO("정보게시판"),
+    CAREER("취업 게시판");
 
-    private final String code;
-    private final String title;
+    private final String display;
 
-    Category(String code, String title){
-        this.code = code;
-        this.title = title;
+    Category(String display){
+        this.display = display;
     }
 
-    public String getCode(){return code;}
-    public String getTitle(){return title;}
+    public String getDisplay(){return display;}
 
-    public static Category fromCode(String code){
+    public static Category fromString(String input){
+        if(input == null || input.isBlank()){
+            throw new IllegalArgumentException("카테고리는 비워둘 수 없습니다");
+        }
+        String normalized = input.trim().toUpperCase();
         return Arrays.stream(Category.values())
-                .filter(c -> c.getCode().equals(code))
+                .filter(c -> c.name().equals(normalized))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + code));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + input));
     }
 }
