@@ -1,5 +1,8 @@
 package org.sopt.domain;
 
+import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.PostErrorCode;
+
 import java.util.Arrays;
 
 public enum Category {
@@ -17,12 +20,12 @@ public enum Category {
 
     public static Category fromString(String input){
         if(input == null || input.isBlank()){
-            throw new IllegalArgumentException("카테고리는 비워둘 수 없습니다");
+            throw new BusinessException(PostErrorCode.EMPTY_POST_CATEGORY);
         }
         String normalized = input.trim().toUpperCase();
         return Arrays.stream(Category.values())
                 .filter(c -> c.name().equals(normalized))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + input));
+                .orElseThrow(() -> new BusinessException(PostErrorCode.INVALID_CATEGORY));
     }
 }

@@ -1,5 +1,8 @@
 package org.sopt.domain;
 
+import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.PostErrorCode;
+
 import java.time.LocalDateTime;
 
 public class Post {
@@ -62,29 +65,29 @@ public class Post {
     //바뀔 수 있는 거 검증
     private void validateModifiable(String title, String content) {
         if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("게시글 제목은 비워둘 수 없습니다");
+            throw new BusinessException(PostErrorCode.EMPTY_POST_TITLE);
         }
-        if (title.length() > 50) {
-            throw new IllegalArgumentException("게시글 제목은 최대 " + MAX_TITLE_LENGTH + "자까지 입력 가능합니다");
+        if (title.length() > MAX_TITLE_LENGTH) {
+            throw new BusinessException(PostErrorCode.TITLE_TOO_LONG);
         }
         if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("게시글 내용은 비워둘 수 없습니다");
+            throw new BusinessException(PostErrorCode.EMPTY_POST_CONTENT);
         }
-        if (content.length() > 500) {
-            throw new IllegalArgumentException("게시글 내용은 최대 " + MAX_CONTENT_LENGTH + "자까지 입력 가능합니다");
+        if (content.length() > MAX_CONTENT_LENGTH) {
+            throw new BusinessException(PostErrorCode.CONTENT_TOO_LONG)
         }
     }
 
     //바뀔 수 없는 거 검증
     private void validateInitial(String writer, Category category, LocalDateTime createdAt) {
         if (writer == null || writer.isBlank()) {
-            throw new IllegalArgumentException("게시글 작성자는 비워둘 수 없습니다.");
+            throw new BusinessException(PostErrorCode.EMPTY_POST_WRITER);
         }
         if (category == null) {
-            throw new IllegalArgumentException("게시글 카테고리는 비워둘 수 없습니다.");
+            throw new BusinessException(PostErrorCode.EMPTY_POST_CATEGORY);
         }
         if (createdAt == null) {
-            throw new IllegalArgumentException("게시글 작성일은 비워둘 수 없습니다.");
+            throw new BusinessException(PostErrorCode.INVALID_CREATED_AT);
         }
     }
 
