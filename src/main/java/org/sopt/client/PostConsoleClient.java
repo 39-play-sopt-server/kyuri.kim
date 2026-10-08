@@ -24,7 +24,10 @@ public class PostConsoleClient {
 
     public void run() {
         while (true) {
-            int choice = inputView.printMenuAndGetInput();
+            //출력에서 입력하는 순서로 분리하기
+            outputView.printMenu();
+            int choice = inputView.inputInt();
+
             if (choice == 0) {
                 outputView.printMessage("프로그램을 종료합니다.");
                 break;
@@ -66,11 +69,8 @@ public class PostConsoleClient {
     private void getAllPosts() {
         ApiResponse<List<PostResponse>> response = postController.getAllPosts();
         if (response.isSuccess()) {
-            List<PostResponse> list = response.getData();
-            System.out.println("\n--- 게시글 목록 ---");
-            for (PostResponse p : list) {
-                System.out.println("[" + p.id() + "] " + p.title() + " (작성자: " + p.writer() + ")");
-            }
+            // 목록 출력 output으로 옮기는 걸로 리팩토링함
+            outputView.printPosts(response.getData());
         } else {
             outputView.printError(response.getMessage());
         }
@@ -78,17 +78,14 @@ public class PostConsoleClient {
 
     private void getPostById() {
         Long id = inputView.inputLong("조회할 게시글 ID");
-        if (id == null) return;
+        if (id == null) {
+            outputView.printError("올바른 숫자를 입력해주세요.");
+            return;
+        }
 
         ApiResponse<PostResponse> response = postController.getPostById(id);
         if (response.isSuccess()) {
-            PostResponse p = response.getData();
-            System.out.println("\n--- 게시글 상세 ---");
-            System.out.println("제목: " + p.title());
-            System.out.println("내용: " + p.content());
-            System.out.println("작성자: " + p.writer());
-            System.out.println("카테고리: " + p.category());
-            System.out.println("작성일: " + p.createdAt());
+            outputView.printPostDetail(response.getData());
         } else {
             outputView.printError(response.getMessage());
         }
@@ -96,7 +93,10 @@ public class PostConsoleClient {
 
     private void updatePost() {
         Long id = inputView.inputLong("수정할 게시글 ID");
-        if (id == null) return;
+        if (id == null) {
+            outputView.printError("올바른 숫자를 입력해주세요.");
+            return;
+        }
 
         String title = inputView.inputString("새 제목");
         String content = inputView.inputString("새 내용");
@@ -113,7 +113,10 @@ public class PostConsoleClient {
 
     private void deletePost() {
         Long id = inputView.inputLong("삭제할 게시글 ID");
-        if (id == null) return;
+        if (id == null) {
+            outputView.printError("올바른 숫자를 입력해주세요.");
+            return;
+        }
 
         ApiResponse<Void> response = postController.deletePost(id);
         if (response.isSuccess()) {
