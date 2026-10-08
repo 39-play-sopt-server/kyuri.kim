@@ -74,7 +74,7 @@ public class Post {
             throw new BusinessException(PostErrorCode.EMPTY_POST_CONTENT);
         }
         if (content.length() > MAX_CONTENT_LENGTH) {
-            throw new BusinessException(PostErrorCode.CONTENT_TOO_LONG)
+            throw new BusinessException(PostErrorCode.CONTENT_TOO_LONG);
         }
     }
 
