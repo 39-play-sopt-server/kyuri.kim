@@ -2,7 +2,6 @@ package org.sopt.client.view;
 
 //입력만 담당 & 숫자 파싱 검증 - 메인.java에서 가져오기
 
-import org.sopt.domain.Category;
 import java.util.Scanner;
 
 public class InputView {

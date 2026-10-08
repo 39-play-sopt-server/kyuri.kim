@@ -22,11 +22,6 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, 200, "성공", data);
     }
 
-    //성공 & 데이터 x
-    public static <T> ApiResponse<Void> success(){
-        return new ApiResponse<>(true, 200, "성공", null);
-    }
-
     //실패
     public static <T> ApiResponse<T> fail(PostErrorCode errorCode){
         return new ApiResponse<>(false, errorCode.getHttpStatus(), errorCode.getMessage(), null);
