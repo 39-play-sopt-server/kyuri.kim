@@ -2,12 +2,12 @@ package org.sopt.client;
 
 //메뉴 루프, 입력 -> 서버 호출 -> 응답 출력하는 파일 (ApiResponse 보고..)
 
+import org.sopt.adapter.in.controller.PostController;
 import org.sopt.adapter.in.dto.CreatePostRequest;
 import org.sopt.adapter.in.dto.PostResponse;
 import org.sopt.client.view.InputView;
 import org.sopt.client.view.OutputView;
 import org.sopt.common.response.ApiResponse;
-import org.sopt.domain.Category;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -49,7 +49,9 @@ public class PostConsoleClient {
         String title = inputView.inputString("제목");
         String content = inputView.inputString("내용");
         String writer = inputView.inputString("작성자");
-        Category category = inputView.inputCategory();
+
+        // Category 객체 대신 순수 String으로 카테고리 입력받기로 변경 (도메인 의존성 제거해야 하니까)
+        String category = inputView.inputString("카테고리 (FREE, INFO, CAREER)");
 
         CreatePostRequest request = new CreatePostRequest(title, content, writer, category);
         ApiResponse<PostResponse> response = postController.createPost(request);

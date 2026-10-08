@@ -4,37 +4,62 @@ package org.sopt.application.service;
 
 import org.sopt.application.port.in.CreatePostCommand;
 import org.sopt.application.port.in.PostUseCase;
-import org.sopt.application.port.out.SavePostPort;
+import org.sopt.application.port.out.PostRepository;
+import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.PostErrorCode;
 import org.sopt.domain.Post;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PostService implements PostUseCase {
-    private final SavePostPort savePostPort;
+    //데이터 저장, 조회 담당하는 아웃바운드 포트
+    private final PostRepository postRepository;
 
-    public PostService(SavePostPort savePostPort){
-        this.savePostPort = savePostPort;
+    public PostService(PostRepository postRepository){
+        this.postRepository = postRepository;
     }
 
     @Override
-    public PostResponse createPost(CreatePostCommand command){
-        //1. 도메인 객체 생성, 비즈니스 검증
-        Post post = new Post(command.title(), command.content(), command.authorId());
+    public Post createPost(CreatePostCommand command){
+        //1. 게시글 생성 정적 팩토리 메서드
+        Post post = Post.create(
+                command.title(),
+                command.content(),
+                command.writer(),
+                command.category()
+        );
 
-        //2. Outbound Port를 통한 저장
-        Post savedPost = savePostPort.save(post);
-
-        //3. 결과 반환
-        return new PostResponse(savedPost.getId(), savedPost.getTitle());
+        //2. 저장하고 결과 반환
+        return postRepository.save(post);
     }
 
-    Member writer = findMemberPort.findById(command.authorId());
+    @Override
+    public List<Post>getAllPosts() {
+        return postRepository.findAll();
+    }
 
-    Post post = Post.create(
-            command.title(),
-            command.content(),
-            writer,
-            category
-    );
+    @Override
+    public Post getPostById(Long id) {
+        return postRepository.findById(id)
+                .orElseThrow(()-> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+    }
+
+    @Override
+    public void updatePost(Long id, String title, String content) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(()-> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+        post.update(title, content);
+        postRepository.save(post);
+    }
+
+    @Override
+    public void deletePost(Long id) {
+        Post post = postRepository.findById(id)
+                        .orElseThrow(()-> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+        postRepository.delete(id);
+    }
 }
 
 

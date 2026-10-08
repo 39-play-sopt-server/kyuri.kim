@@ -6,7 +6,6 @@ package org.sopt.application.port.in;
 import org.sopt.domain.Post;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PostUseCase {
     //등록
@@ -14,7 +13,7 @@ public interface PostUseCase {
     //목록
     List<Post>getAllPosts();
     //상세
-    Optional<Post>getPostBy(Long id);
+    Post getPostById(Long id);
     //수정
     void updatePost(Long id, String title, String content);
     //삭제

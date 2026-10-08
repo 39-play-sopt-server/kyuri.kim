@@ -1,13 +1,20 @@
 package org.sopt;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import org.sopt.client.PostConsoleClient;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
+@SpringBootApplication
 public class Main {
-    public static void main(String[] args) {
-        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
 
-        PostController controller = new PostController();
-        controller.run();
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+
+    @Bean
+    public CommandLineRunner run(PostConsoleClient consoleClient) {
+        return args -> consoleClient.run();
     }
 }

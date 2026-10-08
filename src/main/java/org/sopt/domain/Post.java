@@ -102,6 +102,7 @@ public class Post {
     public Category getCategory() { return category;}
     public LocalDateTime getCreatedAt() { return createdAt;}
     public LocalDateTime getUpdatedAt() { return updatedAt;}
+
 }
 
 ///*POST에 부여해야 하는 책임이 무엇이 있을까요.? (경민님 세미나를 들으면서 작성함)

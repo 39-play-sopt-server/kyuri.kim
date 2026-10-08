@@ -28,12 +28,12 @@ public class ApiResponse<T> {
     }
 
     //실패
-    public static ApiResponse<Void> fail(PostErrorCode errorCode){
+    public static <T> ApiResponse<T> fail(PostErrorCode errorCode){
         return new ApiResponse<>(false, errorCode.getHttpStatus(), errorCode.getMessage(), null);
     }
 
     public boolean isSuccess(){return success;}
-    public int getStauts(){return status;}
+    public int getStatus(){return status;}
     public String getMessage(){return message;}
     public T getData(){return data;}
 

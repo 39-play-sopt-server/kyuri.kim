@@ -8,7 +8,7 @@ import org.sopt.domain.Category;
 public record CreatePostCommand (
     String title,
     String content,
-    Long writer,
+    String writer,
     Category category
 ){
 }
