@@ -107,7 +107,7 @@ public class PostConsoleClient {
         if (response.isSuccess()) {
             outputView.printMessage("게시글이 성공적으로 수정되었습니다.");
         } else {
-            outputView.printError(response.getMessage());
+            outputView.printError("[" + response.getCode() + "] " + response.getMessage());
         }
     }
 

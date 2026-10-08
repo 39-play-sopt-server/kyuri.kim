@@ -21,6 +21,12 @@ public class PostService implements PostUseCase {
         this.postRepository = postRepository;
     }
 
+    //조회랑 예외 처리 하나로 묶어내기
+    private Post findPostById(Long id) {
+        return postRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+    }
+
     @Override
     public Post createPost(CreatePostCommand command){
         //1. 게시글 생성 정적 팩토리 메서드
@@ -42,22 +48,19 @@ public class PostService implements PostUseCase {
 
     @Override
     public Post getPostById(Long id) {
-        return postRepository.findById(id)
-                .orElseThrow(()-> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+        return findPostById(id);
     }
 
     @Override
     public void updatePost(Long id, String title, String content) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(()-> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+        Post post = findPostById(id);
         post.update(title, content);
         postRepository.save(post);
     }
 
     @Override
     public void deletePost(Long id) {
-        Post post = postRepository.findById(id)
-                        .orElseThrow(()-> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+        findPostById(id);
         postRepository.delete(id);
     }
 }
