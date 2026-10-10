@@ -67,7 +67,8 @@ public class PostController {
 
     // 3. 상세
     @GetMapping (path = "/{postId}")
-    public ApiResponse<PostResponse> getPostById(Long id) {
+    public ApiResponse<PostResponse> getPostById(
+            @PathVariable(name = "Id") Long id) {
         return handleRequest(()-> {
             Post post = postUseCase.getPostById(id);
             return PostResponse.from(post);
@@ -86,7 +87,8 @@ public class PostController {
 
     // 5. 삭제
     @DeleteMapping(path = "/{postId}")
-    public ApiResponse<Void> deletePost(Long id) {
+    public ApiResponse<Void> deletePost(
+            @PathVariable(name = "Id") Long id) {
         return handleRequest(()->{
             postUseCase.deletePost(id);
             return null;
