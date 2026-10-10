@@ -15,6 +15,7 @@ public class OutputView {
         System.out.println("3. 게시글 상세 조회");
         System.out.println("4. 게시글 수정");
         System.out.println("5. 게시글 삭제");
+        System.out.println("0: 종료");
         System.out.print("선택: ");
     }
 

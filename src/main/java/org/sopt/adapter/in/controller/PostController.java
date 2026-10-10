@@ -17,16 +17,16 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
 
-@Component // 스프링 빈으로 등록 -> 이거 안해서 빌드 오류남
+@RestController
+@RequestMapping(path = "/api/v1/posts")
 public class PostController {
     private final PostUseCase postUseCase;
     public PostController(PostUseCase postUseCase){
         this.postUseCase = postUseCase;
     }
 
-    //globalexceptionhandler 삭제하는 대신 생성한 공통 예외 처리 래퍼 메서드
     private <T> ApiResponse<T> handleRequest(Supplier<T> supplier) {
         try {
             T result = supplier.get();
@@ -37,7 +37,9 @@ public class PostController {
     }
 
     // 1. 생성
-    public ApiResponse<PostResponse> createPost(CreatePostRequest request) {
+    @PostMapping
+    public ApiResponse<PostResponse> createPost
+    (@RequestBody(required=true) CreatePostRequest request) {
         return handleRequest(()-> {
             Category category = Category.fromString(request.category());
             CreatePostCommand command = new CreatePostCommand(
@@ -52,7 +54,10 @@ public class PostController {
     }
 
     // 2. 목록
-    public ApiResponse<List<PostResponse>> getAllPosts() {
+    @GetMapping
+    public ApiResponse<List<PostResponse>> getAllPosts(
+            @RequestParam(name = "page", defaultValue = "1") int page
+    ) {
         return handleRequest(()->
                 postUseCase.getAllPosts().stream()
                     .map(PostResponse::from)
@@ -61,6 +66,7 @@ public class PostController {
     }
 
     // 3. 상세
+    @GetMapping (path = "/{postId}")
     public ApiResponse<PostResponse> getPostById(Long id) {
         return handleRequest(()-> {
             Post post = postUseCase.getPostById(id);
@@ -69,7 +75,9 @@ public class PostController {
     }
 
     // 4. 수정
-    public ApiResponse<Void> updatePost(Long id, CreatePostRequest request){
+    @PutMapping(path = "/{postId}")
+    public ApiResponse<Void> updatePost(
+            @PathVariable(name = "Id") Long id, CreatePostRequest request){
             return handleRequest(() -> {
                 postUseCase.updatePost(id, request.title(), request.content());
                 return null;
@@ -77,6 +85,7 @@ public class PostController {
         }
 
     // 5. 삭제
+    @DeleteMapping(path = "/{postId}")
     public ApiResponse<Void> deletePost(Long id) {
         return handleRequest(()->{
             postUseCase.deletePost(id);
