@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>게시판 서버</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1f2430;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #3b6cf6;
+      --get: #1a7f4b;
+      --post: #3b6cf6;
+      --put: #b7791f;
+      --delete: #c53030;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14161c;
+        --card: #1d2029;
+        --text: #e8eaf0;
+        --muted: #9aa1b2;
+        --line: #2b303c;
+        --accent: #7c9cff;
+        --get: #4cc38a;
+        --post: #7c9cff;
+        --put: #e0a93b;
+        --delete: #f07178;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 48px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+      line-height: 1.6;
+    }
+    main { max-width: 720px; margin: 0 auto; }
+    header { margin-bottom: 28px; }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    .sub { margin: 0; color: var(--muted); }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      font-size: 14px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--get); }
+    section {
+      margin-top: 20px;
+      padding: 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    .row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+    .row:first-of-type { border-top: none; }
+    .method {
+      flex: none;
+      min-width: 64px;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+    .GET { color: var(--get); }
+    .POST { color: var(--post); }
+    .PUT { color: var(--put); }
+    .DELETE { color: var(--delete); }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+    }
+    .desc { margin-left: auto; color: var(--muted); font-size: 14px; text-align: right; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    footer { margin-top: 28px; color: var(--muted); font-size: 13px; text-align: center; }
+    @media (max-width: 520px) {
+      .row { flex-wrap: wrap; }
+      .desc { margin-left: 76px; text-align: left; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>게시판 서버</h1>
+      <p class="sub">SOPT 서버 파트 1주차 과제 · 헥사고날 아키텍처로 구현한 게시판 API</p>
+      <span class="status"><span class="dot"></span>서버가 정상적으로 실행 중입니다</span>
+    </header>
+
+    <section>
+      <h2>API 목록</h2>
+      <div class="row"><span class="method POST">POST</span><code>/api/posts</code><span class="desc">게시글 작성</span></div>
+      <div class="row"><span class="method GET">GET</span><code>/api/posts</code><span class="desc">게시글 목록 조회</span></div>
+      <div class="row"><span class="method GET">GET</span><code>/api/posts/{id}</code><span class="desc">게시글 상세 조회</span></div>
+      <div class="row"><span class="method PUT">PUT</span><code>/api/posts/{id}</code><span class="desc">게시글 수정</span></div>
+      <div class="row"><span class="method DELETE">DELETE</span><code>/api/posts/{id}</code><span class="desc">게시글 삭제</span></div>
+    </section>
+
+    <section>
+      <h2>응답 형식</h2>
+      <p class="sub">모든 응답은 공통 응답 객체(ApiResponse)로 내려갑니다.</p>
+      <ul>
+        <li>성공 여부, 상태 값, 메시지, 데이터를 함께 담아요.</li>
+        <li>요청이 잘못되었거나 게시글이 없으면 에러 코드와 메시지가 응답으로 와요.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>게시글 규칙</h2>
+      <ul>
+        <li>제목은 비워둘 수 없고 최대 50자까지 입력할 수 있어요.</li>
+        <li>내용은 비워둘 수 없고 최대 500자까지 입력할 수 있어요.</li>
+        <li>카테고리는 FREE, INFO, CAREER 중 하나여야 해요.</li>
+      </ul>
+    </section>
+
+    <footer>데이터는 메모리에 저장되므로 서버를 종료하면 사라집니다.</footer>
+  </main>
+</body>
+</html>
