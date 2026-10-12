@@ -9,8 +9,10 @@ import org.sopt.client.view.InputView;
 import org.sopt.client.view.OutputView;
 import org.sopt.common.response.ApiResponse;
 import org.springframework.stereotype.Component;
+import org.sopt.adapter.in.dto.UpdatePostRequest;
 
 import java.util.List;
+import java.util.Locale;
 
 @Component
 public class PostConsoleClient {
@@ -56,7 +58,10 @@ public class PostConsoleClient {
         String writer = inputView.inputString("작성자");
 
         // Category 객체 대신 순수 String으로 카테고리 입력받기로 변경 (도메인 의존성 제거해야 하니까)
-        String category = inputView.inputString("카테고리 (FREE, INFO, CAREER)");
+        String rawCategory = inputView.inputString("카테고리 (FREE, INFO, CAREER)");
+        String category = (rawCategory != null && !rawCategory.isBlank())
+                ?rawCategory.trim().toUpperCase(Locale.ROOT)
+                :rawCategory;
 
         CreatePostRequest request = new CreatePostRequest(title, content, writer, category);
         ApiResponse<PostResponse> response = postController.createPost(request);
@@ -103,7 +108,7 @@ public class PostConsoleClient {
         String title = inputView.inputString("새 제목");
         String content = inputView.inputString("새 내용");
 
-        CreatePostRequest request = new CreatePostRequest(title, content, null, null);
+        UpdatePostRequest request = new UpdatePostRequest(title, content);
         ApiResponse<Void> response = postController.updatePost(id, request);
 
         if (response.isSuccess()) {

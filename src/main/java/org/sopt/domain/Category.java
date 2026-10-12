@@ -22,9 +22,8 @@ public enum Category {
         if(input == null || input.isBlank()){
             throw new BusinessException(PostErrorCode.EMPTY_POST_CATEGORY);
         }
-        String normalized = input.trim().toUpperCase();
         return Arrays.stream(Category.values())
-                .filter(c -> c.name().equals(normalized))
+                .filter(c -> c.name().equals(input))
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(PostErrorCode.INVALID_CATEGORY));
     }

@@ -4,6 +4,7 @@ package org.sopt.application.service;
 
 import org.sopt.application.port.in.CreatePostCommand;
 import org.sopt.application.port.in.PostUseCase;
+import org.sopt.application.port.in.UpdatePostCommand;
 import org.sopt.application.port.out.PostRepository;
 import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
@@ -52,9 +53,9 @@ public class PostService implements PostUseCase {
     }
 
     @Override
-    public void updatePost(Long id, String title, String content) {
+    public void updatePost(Long id, UpdatePostCommand command) {
         Post post = findPostById(id);
-        post.update(title, content);
+        post.update(command.title(), command.content());
         postRepository.save(post);
     }
 
