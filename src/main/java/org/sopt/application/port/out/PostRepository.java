@@ -16,3 +16,6 @@ public interface PostRepository {
     //삭제
     void delete(Long id);
 }
+
+/*세미나 내용 중에 Repository에 어노테이션 붙이는 거 있었는데.. 저는 얘를 인터페이스로 만들고,
+* 구현체는 Adapter로 나눠서.. 서비스가 클래스를 직접 의존하는 게 아니라 인터페이스에 의존하는 구조입니다.*/

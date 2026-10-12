@@ -26,7 +26,7 @@ public class PostConsoleClient {
         while (true) {
             //출력에서 입력하는 순서로 분리하기
             outputView.printMenu();
-            int choice = inputView.inputInt();
+            int choice = inputView.inputInt("메뉴 선택");
 
             if (choice == 0) {
                 outputView.printMessage("프로그램을 종료합니다.");
@@ -36,7 +36,9 @@ public class PostConsoleClient {
             try {
                 switch (choice) {
                     case 1 -> createPost();
-                    case 2 -> getAllPosts();
+                    case 2 -> {int page = inputView.inputInt("조회할 페이지 번호");
+                    getAllPosts(page);
+                }
                     case 3 -> getPostById();
                     case 4 -> updatePost();
                     case 5 -> deletePost();
@@ -66,8 +68,8 @@ public class PostConsoleClient {
         }
     }
 
-    private void getAllPosts() {
-        ApiResponse<List<PostResponse>> response = postController.getAllPosts();
+    private void getAllPosts(int page) {
+        ApiResponse<List<PostResponse>> response = postController.getAllPosts(page);
         if (response.isSuccess()) {
             // 목록 출력 output으로 옮기는 걸로 리팩토링함
             outputView.printPosts(response.getData());
