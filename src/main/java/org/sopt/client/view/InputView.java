@@ -10,7 +10,8 @@ public class InputView {
 //메뉴 프린트 하는 거 outputview로 이동시킴
 
     //얘는 읽기만 하기
-    public int inputInt() {
+    public int inputInt(String prompt) {
+        System.out.print(prompt + ": ");
         try {
             return Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException e) {
