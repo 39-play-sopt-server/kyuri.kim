@@ -32,7 +32,7 @@ public class Post {
         this.viewCount = viewCount;
     }
 
-    public void increaseViewCount(){
+    public synchronized void increaseViewCount(){ //동시성 방어
         this.viewCount ++;
     }
 

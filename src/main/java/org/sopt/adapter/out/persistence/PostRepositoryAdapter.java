@@ -9,33 +9,36 @@ import org.sopt.domain.Post;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class PostRepositoryAdapter implements PostRepository, LoadPostPort, SavePostPort {
-    private final Map<Long, Post> storage = new LinkedHashMap<>();
+    private final Map<Long, Post> storage = new ConcurrentHashMap<>(); //멀티스레드에서 안전한 해쉬맵으로 변경하기~
 
     private final AtomicLong sequence = new AtomicLong(0L);
 
     @Override
     public Post save(Post post) {
-        if (post.getId() == null) {
-            Long id = sequence.incrementAndGet();
-            Post newPost = Post.reconstitute(
-                    id,
-                    post.getTitle(),
-                    post.getContent(),
-                    post.getWriter(),
-                    post.getCategory(),
-                    post.getCreatedAt(),
-                    post.getUpdatedAt(),
-                    post.getViewCount()
-            );
-            storage.put(id, newPost);
-            return newPost;
-        } else {
-            storage.put(post.getId(), post);
-            return post;
+        synchronized (this) { //동시성 방어
+            if (post.getId() == null) {
+                Long id = sequence.incrementAndGet();
+                Post newPost = Post.reconstitute(
+                        id,
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getWriter(),
+                        post.getCategory(),
+                        post.getCreatedAt(),
+                        post.getUpdatedAt(),
+                        post.getViewCount()
+                );
+                storage.put(id, newPost);
+                return newPost;
+            } else {
+                storage.put(post.getId(), post);
+                return post;
+            }
         }
     }
 
