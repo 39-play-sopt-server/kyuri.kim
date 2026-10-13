@@ -21,26 +21,24 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
     private final AtomicLong sequence = new AtomicLong(0L);
 
     @Override
-    public Post save(Post post) {
-        synchronized (this) { //동시성 방어
-            if (post.getId() == null) {
-                Long id = sequence.incrementAndGet();
-                Post newPost = Post.reconstitute(
-                        id,
-                        post.getTitle(),
-                        post.getContent(),
-                        post.getWriter(),
-                        post.getCategory(),
-                        post.getCreatedAt(),
-                        post.getUpdatedAt(),
-                        post.getViewCount()
-                );
-                storage.put(id, newPost);
-                return newPost;
-            } else {
-                storage.put(post.getId(), post);
-                return post;
-            }
+    public Post save(Post post) { //동시성 방어
+        if (post.getId() == null) {
+            Long id = sequence.incrementAndGet();
+            Post newPost = Post.reconstitute(
+                    id,
+                    post.getTitle(),
+                    post.getContent(),
+                    post.getWriter(),
+                    post.getCategory(),
+                    post.getCreatedAt(),
+                    post.getUpdatedAt(),
+                    post.getViewCount()
+            );
+            storage.put(id, newPost);
+            return newPost;
+        } else {
+            storage.put(post.getId(), post);
+            return post;
         }
     }
 
@@ -48,7 +46,6 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
     public Optional<Post> findById(Long id) {
         return Optional.ofNullable(storage.get(id));
     }
-
     @Override
     public List<Post> findAll(int page, int size, Category category) {
         List<Post> sortedPosts = storage.values().stream()

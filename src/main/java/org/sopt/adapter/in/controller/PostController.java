@@ -43,11 +43,8 @@ public class PostController implements PostApi {
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "category", required = false) String category)
     {
-        Category domainCategory = (category != null && !category.isBlank())
-                ? Category.fromString(category)
-                : null;
+        Category domainCategory = Category.fromNullableString(category);
 
-    //command로 검증이랑 데이터 묶어놓기 -> 팥장님 코리 반영함!
         PostPage postPage = postUseCase.getAllPosts(new GetPostsCommand(page, size, domainCategory));
         return ApiResponse.success(PostPageResponse.from(postPage));
     }

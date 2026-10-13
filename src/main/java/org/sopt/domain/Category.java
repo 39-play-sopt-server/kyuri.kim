@@ -12,14 +12,23 @@ public enum Category {
 
     private final String display;
 
-    Category(String display){
+    Category(String display) {
         this.display = display;
     }
 
-    public String getDisplay(){return display;}
+    public String getDisplay() {
+        return display;
+    }
 
-    public static Category fromString(String input){
-        if(input == null || input.isBlank()){
+    public static Category fromNullableString(String input) {
+        if (input == null || input.isBlank()) {
+            return null;
+        }
+        return Category.fromString(input);
+    }
+
+    public static Category fromString(String input) {
+        if (input == null || input.isBlank()) {
             throw new BusinessException(PostErrorCode.EMPTY_POST_CATEGORY);
         }
         return Arrays.stream(Category.values())

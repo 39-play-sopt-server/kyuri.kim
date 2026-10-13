@@ -3,8 +3,6 @@ package org.sopt.application.service;
 import org.sopt.application.port.in.IncreasePostViewCountUseCase;
 import org.sopt.application.port.out.LoadPostPort;
 import org.sopt.application.port.out.SavePostPort;
-import org.sopt.common.exception.BusinessException;
-import org.sopt.common.exception.PostErrorCode;
 import org.sopt.domain.Post;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +21,6 @@ public class PostViewCountService implements IncreasePostViewCountUseCase {
     public void increaseViewCount(Long postId) {
         // 1. 게시글 조회
         Post post = loadPostPort.loadPost(postId);
-        if (post == null) {
-            throw new BusinessException(PostErrorCode.POST_NOT_FOUND);
-        }
 
         // 2. 도메인 메서드를 통해 조회수 증가
         post.increaseViewCount();
