@@ -9,6 +9,7 @@ import org.sopt.application.port.out.PostRepository;
 import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
 import org.sopt.domain.Post;
+import org.sopt.application.port.in.PostPage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 public class PostService implements PostUseCase {
     //데이터 저장, 조회 담당하는 아웃바운드 포트
     private final PostRepository postRepository;
+    private static final int MAX_PAGE_SIZE = 100;
 
     public PostService(PostRepository postRepository){
         this.postRepository = postRepository;
@@ -43,8 +45,19 @@ public class PostService implements PostUseCase {
     }
 
     @Override
-    public List<Post>getAllPosts() {
-        return postRepository.findAll();
+    public PostPage getAllPosts(int page, int size) {
+        //검증 -> TODO. 딴데로 옮기기
+        if(page<1 || size <1 || size > MAX_PAGE_SIZE){
+            throw new BusinessException(PostErrorCode.INVALID_PAGE_REQUEST);
+        }
+        //데이터 조회
+        List<Post> posts = postRepository.findAll(page, size);
+        long totalElements = postRepository.count();
+
+        //총 페이지 수 계산
+        int totalPages = (int)Math.ceil((double) totalElements/size);
+
+        return new PostPage(posts, page, size, totalElements, totalPages);
     }
 
     @Override

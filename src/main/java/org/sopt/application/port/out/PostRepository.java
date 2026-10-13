@@ -12,9 +12,11 @@ public interface PostRepository {
     //단건 조회
     Optional<Post> findById(Long id);
     //다건 조회
-    List<Post> findAll();
+    List<Post> findAll(int page, int size);
     //삭제
     void delete(Long id);
+    //다건 조회를 위한 count.?
+    long count();
 }
 
 /*세미나 내용 중에 Repository에 어노테이션 붙이는 거 있었는데.. 저는 얘를 인터페이스로 만들고,

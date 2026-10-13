@@ -5,6 +5,7 @@ package org.sopt.adapter.in.controller;
 //생성, 목록, 상세, 수정, 삭제 기능 담고 -> 도메인 객체를 응답 DTO로 감싸서 ApiResponse에 담아서 반환
 
 import org.sopt.adapter.in.dto.CreatePostRequest;
+import org.sopt.adapter.in.dto.PostPageResponse;
 import org.sopt.adapter.in.dto.PostResponse;
 import org.sopt.adapter.in.dto.UpdatePostRequest;
 import org.sopt.application.port.in.CreatePostCommand;
@@ -15,9 +16,7 @@ import org.sopt.common.response.ApiResponse;
 import org.sopt.domain.Category;
 import org.sopt.domain.Post;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.sopt.application.port.in.PostPage;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,7 +25,7 @@ public class PostController {
     private final PostUseCase postUseCase;
     private final IncreasePostViewCountUseCase increasePostViewCountUseCase;
 
-    public PostController(PostUseCase postUseCase, IncreasePostViewCountUseCase increasePostViewCountUseCase){
+    public PostController(PostUseCase postUseCase, IncreasePostViewCountUseCase increasePostViewCountUseCase) {
         this.postUseCase = postUseCase;
         this.increasePostViewCountUseCase = increasePostViewCountUseCase;
     }
@@ -35,27 +34,28 @@ public class PostController {
     @PostMapping
     public ApiResponse<PostResponse> createPost
     (@RequestBody CreatePostRequest request) {
-            Category category = Category.fromString(request.category());
-            CreatePostCommand command = new CreatePostCommand(
-                    request.title(),
-                    request.content(),
-                    request.writer(),
-                    category
-            );
-            Post post = postUseCase.createPost(command);
-            return ApiResponse.success(PostResponse.from(post));
-        }
+        Category category = Category.fromString(request.category());
+        CreatePostCommand command = new CreatePostCommand(
+                request.title(),
+                request.content(),
+                request.writer(),
+                category
+        );
+        Post post = postUseCase.createPost(command);
+        return ApiResponse.success(PostResponse.from(post));
+    }
 
     // 2. 목록
     @GetMapping
-    public ApiResponse<List<PostResponse>> getAllPosts(
-            @RequestParam(name = "page", defaultValue = "1") int page
+    public ApiResponse<PostPageResponse> getAllPosts(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-            List<PostResponse> responses = postUseCase.getAllPosts().stream()
-                    .map(PostResponse::from)
-                    .collect(Collectors.toList());
-            return ApiResponse.success(responses);
-        }
+        PostPage postPage = postUseCase.getAllPosts(page, size);
+        PostPageResponse response = PostPageResponse.from(postPage);
+
+        return ApiResponse.success(response);
+    }
 
     // 3. 상세
     @GetMapping (path = "/{postId}")

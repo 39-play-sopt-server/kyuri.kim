@@ -45,8 +45,20 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
     }
 
     @Override
-    public List<Post> findAll() {
-        return new ArrayList<>(storage.values());
+    public List<Post> findAll(int page, int size) {
+        List<Post> allPosts = new ArrayList<>(storage.values());
+        int start = (page-1) * size;
+
+        if(start>=allPosts.size()){
+            return Collections.emptyList();
+        }
+        int end = Math.min(start+size, allPosts.size());
+        return new ArrayList<>(allPosts.subList(start,end));
+    }
+
+    @Override
+    public long count(){
+        return storage.size();
     }
 
     @Override
