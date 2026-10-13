@@ -5,6 +5,7 @@ import org.sopt.application.port.out.PostRepository;
 import org.sopt.application.port.out.SavePostPort;
 import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
+import org.sopt.domain.Category;
 import org.sopt.domain.Post;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class PostRepositoryAdapter implements PostRepository, LoadPostPort, SavePostPort {
     private final Map<Long, Post> storage = new ConcurrentHashMap<>(); //멀티스레드에서 안전한 해쉬맵으로 변경하기~
+    //-> 근데 이러면 정렬 안되니까 정렬 추가하기
 
     private final AtomicLong sequence = new AtomicLong(0L);
 
@@ -48,20 +50,29 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
     }
 
     @Override
-    public List<Post> findAll(int page, int size) {
-        List<Post> allPosts = new ArrayList<>(storage.values());
+    public List<Post> findAll(int page, int size, Category category) {
+        List<Post> sortedPosts = storage.values().stream()
+                .filter(post -> category == null || post.getCategory() == category)
+                .sorted(Comparator.comparing(Post::getId))
+                .toList();
+
         int start = (page-1) * size;
 
-        if(start>=allPosts.size()){
+        if(start>=sortedPosts.size()){
             return Collections.emptyList();
         }
-        int end = Math.min(start+size, allPosts.size());
-        return new ArrayList<>(allPosts.subList(start,end));
+        int end = Math.min(start+size, sortedPosts.size());
+        return new ArrayList<>(sortedPosts.subList(start,end));
     }
 
     @Override
-    public long count(){
-        return storage.size();
+    public long count(Category category) {
+        if (category == null) {
+            return storage.size();
+        }
+        return storage.values().stream()
+                .filter(post -> post.getCategory() == category)
+                .count();
     }
 
     @Override
