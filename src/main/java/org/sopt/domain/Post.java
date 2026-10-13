@@ -110,7 +110,7 @@ public class Post {
     public Category getCategory() { return category;}
     public LocalDateTime getCreatedAt() { return createdAt;}
     public LocalDateTime getUpdatedAt() { return updatedAt;}
-    public long getViewCount(){return viewCount;}
+    public synchronized long getViewCount(){return this.viewCount;}
 
 }
 

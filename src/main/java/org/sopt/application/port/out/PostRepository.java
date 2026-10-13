@@ -2,6 +2,7 @@ package org.sopt.application.port.out;
 
 //아웃바운드 포트 (repository 인터페이스) | "게시글을 저장한다"는 인터페이스 정의
 
+import org.sopt.domain.Category;
 import org.sopt.domain.Post;
 import java.util.List;
 import java.util.Optional;
@@ -12,11 +13,11 @@ public interface PostRepository {
     //단건 조회
     Optional<Post> findById(Long id);
     //다건 조회
-    List<Post> findAll(int page, int size);
+    List<Post> findAll(int page, int size, Category category);
     //삭제
     void delete(Long id);
     //다건 조회를 위한 count.?
-    long count();
+    long count(Category category);
 }
 
 /*세미나 내용 중에 Repository에 어노테이션 붙이는 거 있었는데.. 저는 얘를 인터페이스로 만들고,

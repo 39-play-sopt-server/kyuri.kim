@@ -8,20 +8,16 @@ import org.sopt.adapter.in.dto.CreatePostRequest;
 import org.sopt.adapter.in.dto.PostPageResponse;
 import org.sopt.adapter.in.dto.PostResponse;
 import org.sopt.adapter.in.dto.UpdatePostRequest;
-import org.sopt.application.port.in.CreatePostCommand;
-import org.sopt.application.port.in.IncreasePostViewCountUseCase;
-import org.sopt.application.port.in.PostUseCase;
-import org.sopt.application.port.in.UpdatePostCommand;
+import org.sopt.application.port.in.*;
 import org.sopt.common.response.ApiResponse;
 import org.sopt.domain.Category;
 import org.sopt.domain.Post;
 
-import org.sopt.application.port.in.PostPage;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api/v1/posts")
-public class PostController {
+public class PostController implements PostApi {
     private final PostUseCase postUseCase;
     private final IncreasePostViewCountUseCase increasePostViewCountUseCase;
 
@@ -31,33 +27,33 @@ public class PostController {
     }
 
     // 1. 생성
+    @Override
     @PostMapping
     public ApiResponse<PostResponse> createPost
     (@RequestBody CreatePostRequest request) {
-        Category category = Category.fromString(request.category());
-        CreatePostCommand command = new CreatePostCommand(
-                request.title(),
-                request.content(),
-                request.writer(),
-                category
-        );
-        Post post = postUseCase.createPost(command);
+        Post post = postUseCase.createPost(request.toCommand());
         return ApiResponse.success(PostResponse.from(post));
     }
 
     // 2. 목록
+    @Override
     @GetMapping
     public ApiResponse<PostPageResponse> getAllPosts(
             @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size
-    ) {
-        PostPage postPage = postUseCase.getAllPosts(page, size);
-        PostPageResponse response = PostPageResponse.from(postPage);
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "category", required = false) String category)
+    {
+        Category domainCategory = (category != null && !category.isBlank())
+                ? Category.fromString(category)
+                : null;
 
-        return ApiResponse.success(response);
+    //command로 검증이랑 데이터 묶어놓기 -> 팥장님 코리 반영함!
+        PostPage postPage = postUseCase.getAllPosts(new GetPostsCommand(page, size, domainCategory));
+        return ApiResponse.success(PostPageResponse.from(postPage));
     }
 
     // 3. 상세
+    @Override
     @GetMapping (path = "/{postId}")
     public ApiResponse<PostResponse> getPostById(
             @PathVariable(name = "postId") Long id) {
@@ -67,18 +63,16 @@ public class PostController {
         }
 
     // 4. 수정
+    @Override
     @PutMapping(path = "/{postId}")
     public ApiResponse<Void> updatePost(
             @PathVariable(name = "postId") Long id, @RequestBody UpdatePostRequest request) {
-            UpdatePostCommand command = new UpdatePostCommand(
-                    request.title(),
-                    request.content()
-            );
-            postUseCase.updatePost(id, command);
-            return ApiResponse.success(null);
-        }
+        postUseCase.updatePost(id, request.toCommand());
+        return ApiResponse.success(null);
+    }
 
     // 5. 삭제
+    @Override
     @DeleteMapping(path = "/{postId}")
     public ApiResponse<Void> deletePost(
             @PathVariable(name = "postId") Long id) {

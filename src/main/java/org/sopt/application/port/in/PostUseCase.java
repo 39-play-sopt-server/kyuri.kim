@@ -9,7 +9,7 @@ public interface PostUseCase {
     //등록
     Post createPost(CreatePostCommand command);
     //목록
-    PostPage getAllPosts(int page, int size);
+    PostPage getAllPosts(GetPostsCommand command);
     //상세
     Post getPostById(Long id);
     //수정
