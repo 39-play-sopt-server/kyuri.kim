@@ -2,7 +2,7 @@ package org.sopt.common.response;
 
 //공통 응답 객체 (제너릭)
 
-import org.sopt.common.exception.PostErrorCode;
+import org.sopt.common.exception.ErrorCode;
 
 public class ApiResponse<T> {
     private final boolean success;
@@ -25,7 +25,7 @@ public class ApiResponse<T> {
     }
 
     //실패
-    public static <T> ApiResponse<T> fail(PostErrorCode errorCode){
+    public static <T> ApiResponse<T> fail(ErrorCode errorCode){
         return new ApiResponse<>(false, errorCode.getHttpStatus(), errorCode.getCode(), errorCode.getMessage(), null);
     }
 

@@ -7,8 +7,8 @@ package org.sopt.adapter.in.controller;
 import org.sopt.adapter.in.dto.CreatePostRequest;
 import org.sopt.adapter.in.dto.PostResponse;
 import org.sopt.adapter.in.dto.UpdatePostRequest;
-import org.sopt.adapter.in.support.ControllerSupport;
 import org.sopt.application.port.in.CreatePostCommand;
+import org.sopt.application.port.in.IncreasePostViewCountUseCase;
 import org.sopt.application.port.in.PostUseCase;
 import org.sopt.application.port.in.UpdatePostCommand;
 import org.sopt.common.response.ApiResponse;
@@ -18,21 +18,24 @@ import org.sopt.domain.Post;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api/v1/posts")
 public class PostController {
     private final PostUseCase postUseCase;
-    public PostController(PostUseCase postUseCase){
+    private final IncreasePostViewCountUseCase increasePostViewCountUseCase;
+
+    public PostController(PostUseCase postUseCase, IncreasePostViewCountUseCase increasePostViewCountUseCase){
         this.postUseCase = postUseCase;
+        this.increasePostViewCountUseCase = increasePostViewCountUseCase;
     }
 
     // 1. 생성
     @PostMapping
     public ApiResponse<PostResponse> createPost
     (@RequestBody(required=true) CreatePostRequest request) {
-        return ControllerSupport.handle(()-> {
             Category category = Category.fromString(request.category());
             CreatePostCommand command = new CreatePostCommand(
                     request.title(),
@@ -41,51 +44,52 @@ public class PostController {
                     category
             );
             Post post = postUseCase.createPost(command);
-            return PostResponse.from(post);
-        });
-    }
+            return ApiResponse.success(PostResponse.from(post));
+        }
 
     // 2. 목록
     @GetMapping
     public ApiResponse<List<PostResponse>> getAllPosts(
             @RequestParam(name = "page", defaultValue = "1") int page
     ) {
-        return ControllerSupport.handle(()->
-                postUseCase.getAllPosts().stream()
+            List<PostResponse> responses = postUseCase.getAllPosts().stream()
                     .map(PostResponse::from)
-                    .collect(Collectors.toList())
-        );
-    }
+                    .collect(Collectors.toList());
+            return ApiResponse.success(responses);
+        }
 
     // 3. 상세
     @GetMapping (path = "/{postId}")
     public ApiResponse<PostResponse> getPostById(
             @PathVariable(name = "postId") Long id) {
-        return ControllerSupport.handle(()-> {
             Post post = postUseCase.getPostById(id);
-            return PostResponse.from(post);
-        });
-    }
+            return ApiResponse.success(PostResponse.from(post));
+        }
 
     // 4. 수정
     @PutMapping(path = "/{postId}")
     public ApiResponse<Void> updatePost(
             @PathVariable(name = "postId") Long id, @RequestBody UpdatePostRequest request) {
-        return ControllerSupport.handleVoid(() -> {
             UpdatePostCommand command = new UpdatePostCommand(
                     request.title(),
                     request.content()
             );
             postUseCase.updatePost(id, command);
-        });
-    }
+            return ApiResponse.success(null);
+        }
 
     // 5. 삭제
     @DeleteMapping(path = "/{postId}")
     public ApiResponse<Void> deletePost(
             @PathVariable(name = "postId") Long id) {
-        return ControllerSupport.handleVoid(()->{
             postUseCase.deletePost(id);
-        });
+            return ApiResponse.success(null);
+        }
+
+    //6. 조회수
+    @PostMapping("/{postId}/view")
+    public ResponseEntity<Void> increaseView(@PathVariable Long postId){
+        increasePostViewCountUseCase.increaseViewCount(postId);
+        return ResponseEntity.ok().build();
     }
 }
