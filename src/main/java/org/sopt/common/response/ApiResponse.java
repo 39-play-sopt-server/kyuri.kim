@@ -26,7 +26,7 @@ public class ApiResponse<T> {
 
     //실패
     public static <T> ApiResponse<T> fail(ErrorCode errorCode){
-        return new ApiResponse<>(false, errorCode.getHttpStatus(), errorCode.getCode(), errorCode.getMessage(), null);
+        return new ApiResponse<>(false, errorCode.getStatus().value(), errorCode.getCode(), errorCode.getMessage(), null);
     }
 
     public boolean isSuccess(){return success;}

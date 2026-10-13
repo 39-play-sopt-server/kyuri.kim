@@ -13,11 +13,12 @@ public class Post {
     private final Category category;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private long viewCount;
 
     private static final int MAX_TITLE_LENGTH = 50;
     private static final int MAX_CONTENT_LENGTH = 500;
 
-    private Post(Long id, String title, String content, String writer, Category category, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private Post(Long id, String title, String content, String writer, Category category, LocalDateTime createdAt, LocalDateTime updatedAt, long viewCount) {
         validateInitial(writer, category, createdAt);
         validateModifiable(title, content);
 
@@ -28,6 +29,11 @@ public class Post {
         this.category = category;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.viewCount = viewCount;
+    }
+
+    public void increaseViewCount(){
+        this.viewCount ++;
     }
 
     public static Post create(
@@ -36,7 +42,7 @@ public class Post {
             String writer,
             Category category
     ) {
-        return new Post(null, title, content, writer, category, LocalDateTime.now(), null);
+        return new Post(null, title, content, writer, category, LocalDateTime.now(), null, 0L);
     }
 
     /*여기서 고민한 내용 -> id를 어떻게 처리할 것인가.. 왜냐면 수정할 수 있어야 하고 게시글 고유 id가 필요하니까..
@@ -50,9 +56,10 @@ public class Post {
             String writer,
             Category category,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt
+            LocalDateTime updatedAt,
+            long viewCount
     ) {
-        return new Post(id, title, content, writer, category, createdAt, updatedAt);
+        return new Post(id, title, content, writer, category, createdAt, updatedAt, viewCount);
     }
 
     public void update(String title, String content) {
@@ -103,6 +110,7 @@ public class Post {
     public Category getCategory() { return category;}
     public LocalDateTime getCreatedAt() { return createdAt;}
     public LocalDateTime getUpdatedAt() { return updatedAt;}
+    public long getViewCount(){return viewCount;}
 
 }
 

@@ -18,7 +18,6 @@ import org.sopt.domain.Post;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,7 +34,7 @@ public class PostController {
     // 1. 생성
     @PostMapping
     public ApiResponse<PostResponse> createPost
-    (@RequestBody(required=true) CreatePostRequest request) {
+    (@RequestBody CreatePostRequest request) {
             Category category = Category.fromString(request.category());
             CreatePostCommand command = new CreatePostCommand(
                     request.title(),
@@ -62,6 +61,7 @@ public class PostController {
     @GetMapping (path = "/{postId}")
     public ApiResponse<PostResponse> getPostById(
             @PathVariable(name = "postId") Long id) {
+            increasePostViewCountUseCase.increaseViewCount(id);
             Post post = postUseCase.getPostById(id);
             return ApiResponse.success(PostResponse.from(post));
         }
@@ -85,11 +85,4 @@ public class PostController {
             postUseCase.deletePost(id);
             return ApiResponse.success(null);
         }
-
-    //6. 조회수
-    @PostMapping("/{postId}/view")
-    public ResponseEntity<Void> increaseView(@PathVariable Long postId){
-        increasePostViewCountUseCase.increaseViewCount(postId);
-        return ResponseEntity.ok().build();
-    }
 }

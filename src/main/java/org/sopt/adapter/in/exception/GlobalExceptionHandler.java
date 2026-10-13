@@ -54,9 +54,10 @@ public class GlobalExceptionHandler {
     // 5. 존재하지 않는 정적 자원/경로 요청
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException e) {
+        ErrorCode errorCode = GlobalErrorCode.NOT_FOUND;
         return ResponseEntity
-                .status(404)
-                .body(ApiResponse.fail(GlobalErrorCode.INTERNAL_SERVER_ERROR)); // 필요에 따라 404용 GlobalErrorCode를 추가하셔도 좋습니다!
+                .status(errorCode.getStatus())
+                .body(ApiResponse.fail(errorCode));
     }
 
     // 6. 그 외 (500)
