@@ -1,7 +1,8 @@
 package org.sopt.common.exception;
 
+import org.springframework.http.HttpStatus;
 
-public enum PostErrorCode {
+public enum PostErrorCode implements ErrorCode{
     //400 - BAD_REQUEST - 잘못 요청
     EMPTY_POST_TITLE(400, "POST-001", "게시글 제목은 비워둘 수 없습니다"),
     EMPTY_POST_CONTENT(400, "POST-002", "게시글 내용은 비워둘 수 없습니다"),
@@ -23,13 +24,20 @@ public enum PostErrorCode {
         this.code = code;
         this.message = message;
     }
+    @Override
+    public HttpStatus getStatus(){return HttpStatus.valueOf(httpStatus);}
 
+    @Override
     public int getHttpStatus(){
         return httpStatus;
     }
+
+    @Override
     public String getCode(){
         return code;
     }
+
+    @Override
     public String getMessage(){
         return message;
     }
