@@ -1,22 +1,31 @@
 package org.sopt.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
 
 import java.time.LocalDateTime;
 
+@Entity
 public class Post {
-    private final Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String title;
     private String content;
-    private final String writer;
-    private final Category category;
-    private final LocalDateTime createdAt;
+    private String writer;
+    private Category category;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private long viewCount;
 
     private static final int MAX_TITLE_LENGTH = 50;
     private static final int MAX_CONTENT_LENGTH = 500;
+
+    protected Post(){}
 
     private Post(Long id, String title, String content, String writer, Category category, LocalDateTime createdAt, LocalDateTime updatedAt, long viewCount) {
         validateInitial(writer, category, createdAt);
@@ -114,23 +123,10 @@ public class Post {
 
 }
 
-///*POST에 부여해야 하는 책임이 무엇이 있을까요.? (경민님 세미나를 들으면서 작성함)
-//저는 가장 먼저 세미나에서 배웠던 1. 캡슐화 (데이터 보호의 책임) 이 떠올랐습니다
-//title이랑 content를 외부에서 수정할 수가 없겠죠.? 그러면 private으로 처리를 해줍니다
-//
-//그리고, 게시글의 제목이나 내용을 수정해야 한다면.? Post가 처리하도록 2. 상태 변경 제어하는 책임이 있을 것이구요
-//
-//제목이나 내용이 비어있는 채로 게시물이 생성될 수 없으니까, 이러한 규칙들을 지켰는지.. 3. 데이터 유효성 검증의 책임이 있을 것 같네요
-//(제목은 null이면 안된다.. 내용은 500자 제한이 있다.. 등)
-//*/
-//
-//
-///*그냥 내가 헷갈려서 정리하는 거
-//static = 객체 만들지 않아도 사용 가능한 것
-//static 없으면 = 객체 만든 다음 그 객체를 통해 사용해야 하는 것
-//void = 반환값이 없음
-//-> 따라서 update는 static x, validate과 create은 static O
-//update랑 validate는 void O, create은 void X
-//
-//static 메서드에서 일반 메서드 호출 불가.. (객체 없어도 실행될 수 있는게 객체가 있어야 실행이 되어야 하는거를 부르면 안되기 때문)
-// */
+/* 3주차 내용 정리
+* 1. @Entity : 이 클래스가 JPA 엔티티임을 선언
+* 2. @Table : 매핑할 테이블 이름 지정
+* 3. @Id : 기본키 필드
+* 4. @GeneratedValue : 기본키 생성 전략
+* 5. @Column : 열 매핑 (이름, NULL 허용, 길이, 유니크)
+* 6. @Enumerated : enum 매핑 방식 */

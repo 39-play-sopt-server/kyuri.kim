@@ -4,6 +4,7 @@ package org.sopt.application.port.out;
 
 import org.sopt.domain.Category;
 import org.sopt.domain.Post;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +16,8 @@ public interface PostRepository {
     //다건 조회
     List<Post> findAll(int page, int size, Category category);
     //삭제
-    void delete(Long id);
-    //다건 조회를 위한 count.?
+    void deleteById(Long id);
+    //다건 조회를 위한 count.? -> 기본 제공 메서드 아니라서 에러
     long count(Category category);
 }
 

@@ -8,6 +8,7 @@ import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
 import org.sopt.domain.Post;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional
     public void updatePost(Long id, UpdatePostCommand command) {
         Post post = findPostById(id);
         post.update(command.title(), command.content());
@@ -67,7 +69,7 @@ public class PostService implements PostUseCase {
     @Override
     public void deletePost(Long id) {
         findPostById(id);
-        postRepository.delete(id);
+        postRepository.deleteById(id);
     }
 }
 

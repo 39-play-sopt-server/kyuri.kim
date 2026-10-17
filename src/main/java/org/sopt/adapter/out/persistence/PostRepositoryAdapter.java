@@ -15,8 +15,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class PostRepositoryAdapter implements PostRepository, LoadPostPort, SavePostPort {
-    private final Map<Long, Post> storage = new ConcurrentHashMap<>(); //멀티스레드에서 안전한 해쉬맵으로 변경하기~
-    //-> 근데 이러면 정렬 안되니까 정렬 추가하기
+    //jpa 추가~ -> 의존성 주입하는 방향으로 해야
+    private final PostJpaRepository postJpaRepository;
+
+    public PostRepositoryAdapter(PostJpaRepository postJpaRepository){
+        this.postJpaRepository = postJpaRepository;
+    }
+
+    private final Map<Long, Post> storage = new ConcurrentHashMap<>();
 
     private final AtomicLong sequence = new AtomicLong(0L);
 
@@ -73,7 +79,7 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         storage.remove(id);
     }
 
