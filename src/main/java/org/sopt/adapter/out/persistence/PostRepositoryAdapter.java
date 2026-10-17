@@ -1,41 +1,42 @@
 package org.sopt.adapter.out.persistence;
 
+import org.sopt.application.port.out.LoadPostPort;
 import org.sopt.application.port.out.PostRepository;
+import org.sopt.application.port.out.SavePostPort;
+import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.PostErrorCode;
+import org.sopt.domain.Category;
 import org.sopt.domain.Post;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-//어댑터 계층을 메모리 방식으로 갈지 JPA 방식으로 갈지 결정하는 과정에서 'hashmap' 사용하라는 과제에 -> HashMap + AtomicLong 사용하기로 했습니당
-@Repository
-public class PostRepositoryAdapter implements PostRepository {
-    //1. 메모리 저장소 (순서 유지를 위해 linkedHashMap 사용하기로..)
-    private final Map<Long, Post> storage = new LinkedHashMap<>();
+@Component
+public class PostRepositoryAdapter implements PostRepository, LoadPostPort, SavePostPort {
+    private final Map<Long, Post> storage = new ConcurrentHashMap<>(); //멀티스레드에서 안전한 해쉬맵으로 변경하기~
+    //-> 근데 이러면 정렬 안되니까 정렬 추가하기
 
-    //2. 동시성 안전한 ID 카운터
     private final AtomicLong sequence = new AtomicLong(0L);
 
     @Override
-    public Post save(Post post) {
-        //Post의 id가 null인지 여부로 신규랑 수정을 분류하기
-        if(post.getId() == null){
-            Long newId = sequence.incrementAndGet(); //sequence에서 새 ID 가져오고
-
-            Post newPost = Post.reconstitute( //id는 final이니까 새로 만들고
-                    newId,
+    public Post save(Post post) { //동시성 방어
+        if (post.getId() == null) {
+            Long id = sequence.incrementAndGet();
+            Post newPost = Post.reconstitute(
+                    id,
                     post.getTitle(),
                     post.getContent(),
                     post.getWriter(),
                     post.getCategory(),
                     post.getCreatedAt(),
-                    post.getUpdatedAt()
+                    post.getUpdatedAt(),
+                    post.getViewCount()
             );
-            //storage에 쌍으로 저장
-            storage.put(newId, newPost);
+            storage.put(id, newPost);
             return newPost;
-        } else{
-            //id 이미 있으면 덮어쓰기
+        } else {
             storage.put(post.getId(), post);
             return post;
         }
@@ -45,19 +46,48 @@ public class PostRepositoryAdapter implements PostRepository {
     public Optional<Post> findById(Long id) {
         return Optional.ofNullable(storage.get(id));
     }
+    @Override
+    public List<Post> findAll(int page, int size, Category category) {
+        List<Post> sortedPosts = storage.values().stream()
+                .filter(post -> category == null || post.getCategory() == category)
+                .sorted(Comparator.comparing(Post::getId))
+                .toList();
+
+        int start = (page-1) * size;
+
+        if(start>=sortedPosts.size()){
+            return Collections.emptyList();
+        }
+        int end = Math.min(start+size, sortedPosts.size());
+        return new ArrayList<>(sortedPosts.subList(start,end));
+    }
 
     @Override
-    public List<Post> findAll() {
-        return new ArrayList<>(storage.values());
+    public long count(Category category) {
+        if (category == null) {
+            return storage.size();
+        }
+        return storage.values().stream()
+                .filter(post -> post.getCategory() == category)
+                .count();
     }
 
     @Override
     public void delete(Long id) {
         storage.remove(id);
     }
-}
 
-/*Map<Long, Post> 이면 [Key, Value] 쌍으로 데이터를 저장하는 구조
-*Key는 Long (게시글 ID)이고, Value는 Post(게시글 객체)
-* LinkedHashMap하면 전체 목록 조회해서 순서대로 나온다
-* AtomicLong은 멀티스레드 환경에서도 원자성 보장해주는 클래스*/
+    @Override
+    public Post loadPost(Long postId) {
+        Post post = storage.get(postId);
+        if (post == null) {
+            throw new BusinessException(PostErrorCode.POST_NOT_FOUND);
+        }
+        return post;
+    }
+
+    @Override
+    public void savePost(Post post) {
+        save(post);
+    }
+}

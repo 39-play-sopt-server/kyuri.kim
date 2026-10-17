@@ -5,17 +5,15 @@ package org.sopt.application.port.in;
 
 import org.sopt.domain.Post;
 
-import java.util.List;
-
 public interface PostUseCase {
     //등록
     Post createPost(CreatePostCommand command);
     //목록
-    List<Post>getAllPosts();
+    PostPage getAllPosts(GetPostsCommand command);
     //상세
     Post getPostById(Long id);
     //수정
-    void updatePost(Long id, String title, String content);
+    void updatePost(Long id, UpdatePostCommand command);
     //삭제
     void deletePost(Long id);
 }

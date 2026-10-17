@@ -5,7 +5,7 @@ import org.sopt.domain.Post;
 import java.time.LocalDateTime;
 
 //응답 DTO
-public record PostResponse(Long id, String title, String content, String writer, String category, LocalDateTime createdAt, LocalDateTime updatedAt) {
+public record PostResponse(Long id, String title, String content, String writer, String category, LocalDateTime createdAt, LocalDateTime updatedAt, long viewCount) {
     public static PostResponse from(Post post) {
         return new PostResponse(
                 post.getId(),
@@ -14,7 +14,8 @@ public record PostResponse(Long id, String title, String content, String writer,
                 post.getWriter(),
                 post.getCategory().name(),
                 post.getCreatedAt(),
-                post.getUpdatedAt()
+                post.getUpdatedAt(),
+                post.getViewCount()
         );
     }
 }

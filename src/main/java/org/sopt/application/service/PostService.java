@@ -2,8 +2,7 @@ package org.sopt.application.service;
 
 //입력 포트를 구현하고, 출력포트를 사용하는 파일 -> 유스케이스 구현체
 
-import org.sopt.application.port.in.CreatePostCommand;
-import org.sopt.application.port.in.PostUseCase;
+import org.sopt.application.port.in.*;
 import org.sopt.application.port.out.PostRepository;
 import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
@@ -42,8 +41,15 @@ public class PostService implements PostUseCase {
     }
 
     @Override
-    public List<Post>getAllPosts() {
-        return postRepository.findAll();
+    public PostPage getAllPosts(GetPostsCommand command) {
+
+        List<Post> posts = postRepository.findAll(command.page(), command.size(), command.category());
+        long totalElements = postRepository.count(command.category());
+
+        //총 페이지 수 계산
+        int totalPages = (int)Math.ceil((double) totalElements/command.size());
+
+        return new PostPage(posts, command.page(), command.size(), totalElements, totalPages);
     }
 
     @Override
@@ -52,9 +58,9 @@ public class PostService implements PostUseCase {
     }
 
     @Override
-    public void updatePost(Long id, String title, String content) {
+    public void updatePost(Long id, UpdatePostCommand command) {
         Post post = findPostById(id);
-        post.update(title, content);
+        post.update(command.title(), command.content());
         postRepository.save(post);
     }
 

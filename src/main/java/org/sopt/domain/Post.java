@@ -13,11 +13,12 @@ public class Post {
     private final Category category;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private long viewCount;
 
     private static final int MAX_TITLE_LENGTH = 50;
     private static final int MAX_CONTENT_LENGTH = 500;
 
-    private Post(Long id, String title, String content, String writer, Category category, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private Post(Long id, String title, String content, String writer, Category category, LocalDateTime createdAt, LocalDateTime updatedAt, long viewCount) {
         validateInitial(writer, category, createdAt);
         validateModifiable(title, content);
 
@@ -28,6 +29,11 @@ public class Post {
         this.category = category;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.viewCount = viewCount;
+    }
+
+    public synchronized void increaseViewCount(){ //동시성 방어
+        this.viewCount ++;
     }
 
     public static Post create(
@@ -36,12 +42,13 @@ public class Post {
             String writer,
             Category category
     ) {
-        return new Post(null, title, content, writer, category, LocalDateTime.now(), null);
+        return new Post(null, title, content, writer, category, LocalDateTime.now(), null, 0L);
     }
 
     /*여기서 고민한 내용 -> id를 어떻게 처리할 것인가.. 왜냐면 수정할 수 있어야 하고 게시글 고유 id가 필요하니까..
      * 위에는 'create'이고, 수정하거나 삭제하거나 등등의 경우에 게시물을 특정할 요소가 필요해서 id를 넣고 -> DB에서 id로 조회할 수 있도록 해야..*/
 
+    //저장된 데이터를 바탕으로 도메인 객체를 복원할 때에만 사용. 새로운 게시글 생성할 때에는 Create() 팩토리 메서드만 사용.
     public static Post reconstitute(
             Long id,
             String title,
@@ -49,9 +56,10 @@ public class Post {
             String writer,
             Category category,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt
+            LocalDateTime updatedAt,
+            long viewCount
     ) {
-        return new Post(id, title, content, writer, category, createdAt, updatedAt);
+        return new Post(id, title, content, writer, category, createdAt, updatedAt, viewCount);
     }
 
     public void update(String title, String content) {
@@ -63,7 +71,7 @@ public class Post {
     }
 
     //바뀔 수 있는 거 검증
-    private void validateModifiable(String title, String content) {
+    private static void validateModifiable(String title, String content) {
         if (title == null || title.isBlank()) {
             throw new BusinessException(PostErrorCode.EMPTY_POST_TITLE);
         }
@@ -79,7 +87,7 @@ public class Post {
     }
 
     //바뀔 수 없는 거 검증
-    private void validateInitial(String writer, Category category, LocalDateTime createdAt) {
+    private static void validateInitial(String writer, Category category, LocalDateTime createdAt) {
         if (writer == null || writer.isBlank()) {
             throw new BusinessException(PostErrorCode.EMPTY_POST_WRITER);
         }
@@ -102,6 +110,7 @@ public class Post {
     public Category getCategory() { return category;}
     public LocalDateTime getCreatedAt() { return createdAt;}
     public LocalDateTime getUpdatedAt() { return updatedAt;}
+    public synchronized long getViewCount(){return this.viewCount;}
 
 }
 

@@ -5,100 +5,75 @@ package org.sopt.adapter.in.controller;
 //생성, 목록, 상세, 수정, 삭제 기능 담고 -> 도메인 객체를 응답 DTO로 감싸서 ApiResponse에 담아서 반환
 
 import org.sopt.adapter.in.dto.CreatePostRequest;
+import org.sopt.adapter.in.dto.PostPageResponse;
 import org.sopt.adapter.in.dto.PostResponse;
-import org.sopt.application.port.in.CreatePostCommand;
-import org.sopt.application.port.in.PostUseCase;
-import org.sopt.common.exception.BusinessException;
+import org.sopt.adapter.in.dto.UpdatePostRequest;
+import org.sopt.application.port.in.*;
 import org.sopt.common.response.ApiResponse;
 import org.sopt.domain.Category;
 import org.sopt.domain.Post;
-
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api/v1/posts")
-public class PostController {
+public class PostController implements PostApi {
     private final PostUseCase postUseCase;
-    public PostController(PostUseCase postUseCase){
-        this.postUseCase = postUseCase;
-    }
+    private final IncreasePostViewCountUseCase increasePostViewCountUseCase;
 
-    private <T> ApiResponse<T> handleRequest(Supplier<T> supplier) {
-        try {
-            T result = supplier.get();
-            return ApiResponse.success(result);
-        } catch (BusinessException e) {
-            return ApiResponse.fail(e.getErrorCode());
-        }
+    public PostController(PostUseCase postUseCase, IncreasePostViewCountUseCase increasePostViewCountUseCase) {
+        this.postUseCase = postUseCase;
+        this.increasePostViewCountUseCase = increasePostViewCountUseCase;
     }
 
     // 1. 생성
+    @Override
     @PostMapping
     public ApiResponse<PostResponse> createPost
-    (@RequestBody(required=true) CreatePostRequest request) {
-        return handleRequest(()-> {
-            Category category = Category.fromString(request.category());
-            CreatePostCommand command = new CreatePostCommand(
-                    request.title(),
-                    request.content(),
-                    request.writer(),
-                    category
-            );
-            Post post = postUseCase.createPost(command);
-            return PostResponse.from(post);
-        });
+    (@RequestBody CreatePostRequest request) {
+        Post post = postUseCase.createPost(request.toCommand());
+        return ApiResponse.success(PostResponse.from(post));
     }
 
     // 2. 목록
+    @Override
     @GetMapping
-    public ApiResponse<List<PostResponse>> getAllPosts(
-            @RequestParam(name = "page", defaultValue = "1") int page
-    ) {
-        return handleRequest(()->
-                postUseCase.getAllPosts().stream()
-                    .map(PostResponse::from)
-                    .collect(Collectors.toList())
-        );
+    public ApiResponse<PostPageResponse> getAllPosts(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "category", required = false) String category)
+    {
+        Category domainCategory = Category.fromNullableString(category);
+
+        PostPage postPage = postUseCase.getAllPosts(new GetPostsCommand(page, size, domainCategory));
+        return ApiResponse.success(PostPageResponse.from(postPage));
     }
 
     // 3. 상세
+    @Override
     @GetMapping (path = "/{postId}")
     public ApiResponse<PostResponse> getPostById(
-            @PathVariable(name = "Id") Long id) {
-        return handleRequest(()-> {
+            @PathVariable(name = "postId") Long id) {
+            increasePostViewCountUseCase.increaseViewCount(id);
             Post post = postUseCase.getPostById(id);
-            return PostResponse.from(post);
-        });
-    }
-
-    // 4. 수정
-    @PutMapping(path = "/{postId}")
-    public ApiResponse<Void> updatePost(
-            @PathVariable(name = "Id") Long id, CreatePostRequest request){
-            return handleRequest(() -> {
-                postUseCase.updatePost(id, request.title(), request.content());
-                return null;
-            });
+            return ApiResponse.success(PostResponse.from(post));
         }
 
+    // 4. 수정
+    @Override
+    @PutMapping(path = "/{postId}")
+    public ApiResponse<Void> updatePost(
+            @PathVariable(name = "postId") Long id, @RequestBody UpdatePostRequest request) {
+        postUseCase.updatePost(id, request.toCommand());
+        return ApiResponse.success(null);
+    }
+
     // 5. 삭제
+    @Override
     @DeleteMapping(path = "/{postId}")
     public ApiResponse<Void> deletePost(
-            @PathVariable(name = "Id") Long id) {
-        return handleRequest(()->{
+            @PathVariable(name = "postId") Long id) {
             postUseCase.deletePost(id);
-            return null;
-        });
-    }
+            return ApiResponse.success(null);
+        }
 }
-
-
-/*1. RestController - HTTP 요청 받는 컨트롤러임을 알려주는 어노테이션
--> @Controller (웹 요청 처리하는 Controller라는 뜻) + @ResponseBody ( 메서드의 반환값을 HTTP 응답의 바디에 넣어준다는 뜻)
-
-* 2. RequestBody - HTTP 요청 바디에 들어있는 JSON을 CreatePostRequest 객체로 변환
-* -> 근데 JPA 방식 아니니까 다 지움 (globalexception handler 지우면서 다 지웠습니다 -> 콘솔에서 직접 호출하는 구조로 처음에 과제가 주어졌으니까,,*/

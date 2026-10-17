@@ -5,14 +5,14 @@ package org.sopt.common.exception;
 
 public class BusinessException extends RuntimeException{
 
-    private final PostErrorCode errorCode;
+    private final ErrorCode errorCode;
 
-    public BusinessException(PostErrorCode errorCode){
+    public BusinessException(ErrorCode errorCode){
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 
-    public PostErrorCode getErrorCode(){
+    public ErrorCode getErrorCode(){
         return errorCode;
     }
 }
