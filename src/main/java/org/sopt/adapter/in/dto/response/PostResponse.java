@@ -1,7 +1,6 @@
 package org.sopt.adapter.in.dto.response;
 
 import org.sopt.domain.Post;
-
 import java.time.LocalDateTime;
 
 //응답 DTO
@@ -11,7 +10,7 @@ public record PostResponse(Long id, String title, String content, String writer,
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
-                post.getWriter(),
+                post.getMember().getDisplayName(),
                 post.getCategory().name(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),

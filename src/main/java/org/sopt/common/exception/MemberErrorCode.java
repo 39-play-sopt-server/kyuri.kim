@@ -7,6 +7,12 @@ public enum MemberErrorCode implements ErrorCode {
             HttpStatus.NOT_FOUND,
             "MEMBER-001",
             "존재하지 않는 회원입니다"
+    ),
+
+    MEMBER_WITHDRAWN(
+            HttpStatus.BAD_REQUEST,
+        "MEMBER-002",
+                "탈퇴한 회원은 게시글을 작성할 수 없습니다"
     );
 
     private final HttpStatus status;

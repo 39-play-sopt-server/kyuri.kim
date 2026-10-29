@@ -11,7 +11,10 @@ public class Post extends BaseEntity {
     private Long id;
     private String title;
     private String content;
-    private String writer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Enumerated(EnumType.STRING)
     private Category category;
@@ -23,14 +26,14 @@ public class Post extends BaseEntity {
 
     protected Post(){}
 
-    private Post(Long id, String title, String content, String writer, Category category, long viewCount) {
-        validateInitial(writer, category);
+    private Post(Long id, String title, String content, Member member, Category category, long viewCount) {
+        validateInitial(member, category);
         validateModifiable(title, content);
 
         this.id = id;
         this.title = title;
         this.content = content;
-        this.writer = writer;
+        this.member = member;
         this.category = category;
         this.viewCount = viewCount;
     }
@@ -42,10 +45,10 @@ public class Post extends BaseEntity {
     public static Post create(
             String title,
             String content,
-            String writer,
+            Member member,
             Category category
     ) {
-        return new Post(null, title, content, writer, category, 0L);
+        return new Post(null, title, content, member, category, 0L);
     }
 
     //저장된 데이터를 바탕으로 도메인 객체를 복원할 때에만 사용. 새로운 게시글 생성할 때에는 Create() 팩토리 메서드만 사용.
@@ -53,11 +56,11 @@ public class Post extends BaseEntity {
             Long id,
             String title,
             String content,
-            String writer,
+            Member member,
             Category category,
             long viewCount
     ) {
-        return new Post(id, title, content, writer, category, viewCount);
+        return new Post(id, title, content, member, category, viewCount);
     }
 
     public void update(String title, String content) {
@@ -84,8 +87,8 @@ public class Post extends BaseEntity {
     }
 
     //바뀔 수 없는 거 검증
-    private static void validateInitial(String writer, Category category) {
-        if (writer == null || writer.isBlank()) {
+    private static void validateInitial(Member member, Category category) {
+        if (member == null) {
             throw new BusinessException(PostErrorCode.EMPTY_POST_WRITER);
         }
         if (category == null) {
@@ -100,7 +103,7 @@ public class Post extends BaseEntity {
     public Long getId() { return id;}
     public String getTitle() { return title;}
     public String getContent() { return content;}
-    public String getWriter() { return writer;}
+    public Member getMember() { return member;}
     public Category getCategory() { return category;}
     public synchronized long getViewCount(){return this.viewCount;}
 

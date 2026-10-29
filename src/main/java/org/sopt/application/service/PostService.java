@@ -3,9 +3,12 @@ package org.sopt.application.service;
 //입력 포트를 구현하고, 출력포트를 사용하는 파일 -> 유스케이스 구현체
 
 import org.sopt.application.port.in.*;
+import org.sopt.application.port.out.MemberRepository;
 import org.sopt.application.port.out.PostRepository;
 import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.MemberErrorCode;
 import org.sopt.common.exception.PostErrorCode;
+import org.sopt.domain.Member;
 import org.sopt.domain.Post;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +19,11 @@ import java.util.List;
 public class PostService implements PostUseCase {
     //데이터 저장, 조회 담당하는 아웃바운드 포트
     private final PostRepository postRepository;
+    private final MemberRepository memberRepository;
 
-    public PostService(PostRepository postRepository){
+    public PostService(PostRepository postRepository, MemberRepository memberRepository){
         this.postRepository = postRepository;
+        this.memberRepository = memberRepository;
     }
 
     //조회랑 예외 처리 하나로 묶어내기
@@ -29,11 +34,19 @@ public class PostService implements PostUseCase {
 
     @Override
     public Post createPost(CreatePostCommand command){
+        Member member = memberRepository.findById(command.memberId())
+                .orElseThrow(()->
+                        new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.isDeleted()) {
+            throw new BusinessException(MemberErrorCode.MEMBER_WITHDRAWN);
+        }
+
         //1. 게시글 생성 정적 팩토리 메서드
         Post post = Post.create(
                 command.title(),
                 command.content(),
-                command.writer(),
+                member,
                 command.category()
         );
 
@@ -49,7 +62,6 @@ public class PostService implements PostUseCase {
 
         //총 페이지 수 계산
         int totalPages = (int)Math.ceil((double) totalElements/command.size());
-
         return new PostPage(posts, command.page(), command.size(), totalElements, totalPages);
     }
 
@@ -72,14 +84,3 @@ public class PostService implements PostUseCase {
         postRepository.deleteById(id);
     }
 }
-
-
-/*
-* 1. @Service란
-* - 서비스 역할을 하는 클래스(위에서는 게시글 생성이라는 비즈니스 로직 처리)임을 스프링에게 알려줌
-* -> Bean으로 등록 -> Spring이 알아서 객체 만들어서 넣어줌
-* => 의존성 주입 (DI)
-*
-* 2. @Override란
-* - 부모에 있던 메서드를 재정의
-* */
