@@ -1,4 +1,4 @@
-package org.sopt.adapter.in.dto;
+package org.sopt.adapter.in.dto.request;
 
 import org.sopt.application.port.in.UpdatePostCommand;
 

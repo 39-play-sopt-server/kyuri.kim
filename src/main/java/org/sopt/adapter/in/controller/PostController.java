@@ -4,15 +4,17 @@ package org.sopt.adapter.in.controller;
 //외부의 HTTP 요청을 애플리케이션의 인바운드 포트로 전달하는 인바운드 어댑터 파일
 //생성, 목록, 상세, 수정, 삭제 기능 담고 -> 도메인 객체를 응답 DTO로 감싸서 ApiResponse에 담아서 반환
 
-import org.sopt.adapter.in.dto.CreatePostRequest;
-import org.sopt.adapter.in.dto.PostPageResponse;
-import org.sopt.adapter.in.dto.PostResponse;
-import org.sopt.adapter.in.dto.UpdatePostRequest;
+import org.sopt.adapter.in.dto.request.CreatePostRequest;
+import org.sopt.adapter.in.dto.response.PostPageResponse;
+import org.sopt.adapter.in.dto.response.PostResponse;
+import org.sopt.adapter.in.dto.request.UpdatePostRequest;
 import org.sopt.application.port.in.*;
 import org.sopt.common.response.ApiResponse;
 import org.sopt.domain.Category;
 import org.sopt.domain.Post;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,13 +31,13 @@ public class PostController implements PostApi {
     // 1. 생성
     @Override
     @PostMapping
-    public ApiResponse<PostResponse> createPost
+    public ResponseEntity<ApiResponse<PostResponse>> createPost
     (@RequestBody CreatePostRequest request) {
         Post post = postUseCase.createPost(request.toCommand());
-        return ApiResponse.success(PostResponse.from(post));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), PostResponse.from(post)));
     }
 
-    // 2. 목록
+    //2. 목록
     @Override
     @GetMapping
     public ApiResponse<PostPageResponse> getAllPosts(

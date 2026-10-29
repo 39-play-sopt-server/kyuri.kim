@@ -20,8 +20,12 @@ public class ApiResponse<T> {
     }
 
     //성공 & 데이터 O
+    public static <T> ApiResponse<T> success(int status, T data){
+        return new ApiResponse<>(true,status, null, "성공", data);
+    }
+
     public static <T> ApiResponse<T> success(T data){
-        return new ApiResponse<>(true,200, null, "성공", data);
+        return new ApiResponse<>(true, 200,null, "성공", data);
     }
 
     //실패
