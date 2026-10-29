@@ -9,7 +9,11 @@ public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, length = 50)
     private String title;
+
+    @Column(nullable = false, length = 500)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -17,6 +21,7 @@ public class Post extends BaseEntity {
     private Member member;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Category category;
 
     private long viewCount;
