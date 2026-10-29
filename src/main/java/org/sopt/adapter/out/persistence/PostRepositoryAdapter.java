@@ -10,8 +10,6 @@ import org.sopt.domain.Post;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class PostRepositoryAdapter implements PostRepository, LoadPostPort, SavePostPort {
@@ -22,74 +20,52 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
         this.postJpaRepository = postJpaRepository;
     }
 
-    private final Map<Long, Post> storage = new ConcurrentHashMap<>();
-
-    private final AtomicLong sequence = new AtomicLong(0L);
-
     @Override
-    public Post save(Post post) { //동시성 방어
-        if (post.getId() == null) {
-            Long id = sequence.incrementAndGet();
-            Post newPost = Post.reconstitute(
-                    id,
-                    post.getTitle(),
-                    post.getContent(),
-                    post.getWriter(),
-                    post.getCategory(),
-                    post.getCreatedAt(),
-                    post.getUpdatedAt(),
-                    post.getViewCount()
-            );
-            storage.put(id, newPost);
-            return newPost;
-        } else {
-            storage.put(post.getId(), post);
-            return post;
-        }
+    public Post save(Post post) {
+        return postJpaRepository.save(post);
     }
 
     @Override
     public Optional<Post> findById(Long id) {
-        return Optional.ofNullable(storage.get(id));
+        return postJpaRepository.findById(id);
     }
+
     @Override
     public List<Post> findAll(int page, int size, Category category) {
-        List<Post> sortedPosts = storage.values().stream()
+        List<Post> posts = postJpaRepository.findAll().stream()
                 .filter(post -> category == null || post.getCategory() == category)
                 .sorted(Comparator.comparing(Post::getId))
                 .toList();
 
         int start = (page-1) * size;
 
-        if(start>=sortedPosts.size()){
+        if(start>=posts.size()){
             return Collections.emptyList();
         }
-        int end = Math.min(start+size, sortedPosts.size());
-        return new ArrayList<>(sortedPosts.subList(start,end));
+        int end = Math.min(start+size, posts.size());
+        return new ArrayList<>(posts.subList(start,end));
     }
 
     @Override
     public long count(Category category) {
         if (category == null) {
-            return storage.size();
+            return postJpaRepository.count();
         }
-        return storage.values().stream()
+        return postJpaRepository.findAll().stream()
                 .filter(post -> post.getCategory() == category)
                 .count();
     }
 
     @Override
     public void deleteById(Long id) {
-        storage.remove(id);
+        postJpaRepository.deleteById(id);
     }
 
     @Override
     public Post loadPost(Long postId) {
-        Post post = storage.get(postId);
-        if (post == null) {
-            throw new BusinessException(PostErrorCode.POST_NOT_FOUND);
-        }
-        return post;
+        return postJpaRepository.findById(postId)
+                .orElseThrow(() ->
+                        new BusinessException(PostErrorCode.POST_NOT_FOUND));
     }
 
     @Override
