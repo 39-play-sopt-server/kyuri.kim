@@ -3,6 +3,8 @@ package org.sopt.application.service;
 import org.sopt.application.port.in.CreateMemberCommand;
 import org.sopt.application.port.in.MemberUseCase;
 import org.sopt.application.port.out.MemberRepository;
+import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.MemberErrorCode;
 import org.sopt.domain.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,5 +23,16 @@ public class MemberService implements MemberUseCase {
     public Member createMember(CreateMemberCommand command) {
         Member member = Member.create(command.name());
         return memberRepository.save(member);
+    }
+
+    @Override
+    @Transactional
+    public void withdrawMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        member.withdraw();
+        memberRepository.save(member);
     }
 }
