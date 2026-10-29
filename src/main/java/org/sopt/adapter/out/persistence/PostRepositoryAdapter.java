@@ -7,6 +7,10 @@ import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
 import org.sopt.domain.Category;
 import org.sopt.domain.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -32,28 +36,25 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
 
     @Override
     public List<Post> findAll(int page, int size, Category category) {
-        List<Post> posts = postJpaRepository.findAll().stream()
-                .filter(post -> category == null || post.getCategory() == category)
-                .sorted(Comparator.comparing(Post::getId))
-                .toList();
+        Sort sort = Sort.by(
+                Sort.Order.desc("createdAt"),
+                Sort.Order.desc("id")
+        );
 
-        int start = (page-1) * size;
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        if(start>=posts.size()){
-            return Collections.emptyList();
-        }
-        int end = Math.min(start+size, posts.size());
-        return new ArrayList<>(posts.subList(start,end));
+        Page<Post> result = category == null
+                ? postJpaRepository.findAll(pageable)
+                : postJpaRepository.findByCategory(category, pageable);
+
+        return result.getContent();
     }
 
     @Override
     public long count(Category category) {
-        if (category == null) {
-            return postJpaRepository.count();
-        }
-        return postJpaRepository.findAll().stream()
-                .filter(post -> post.getCategory() == category)
-                .count();
+        return category == null
+                ? postJpaRepository.count()
+                : postJpaRepository.countByCategory(category);
     }
 
     @Override
