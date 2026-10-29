@@ -21,7 +21,8 @@ public interface PostApi {
     ApiResponse<PostPageResponse> getAllPosts(
             @Parameter(description = "페이지 번호", example = "1") int page,
             @Parameter(description = "페이지 사이즈", example = "10") int size,
-            @Parameter(description = "카테고리 이름(FREE, INFO, CAREER)", example = "FREE") String category
+            @Parameter(description = "카테고리 이름(FREE, INFO, CAREER)", example = "FREE") String category,
+            @Parameter(description = "게시글 제목", example = "제목") String title
     );
 
     @Operation(summary = "게시글 상세 조회", description = "해당 게시글의 상세 정보를 조회하고 조회수를 1 증가시킵니다.")

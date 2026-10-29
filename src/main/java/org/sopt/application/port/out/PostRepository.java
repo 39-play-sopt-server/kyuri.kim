@@ -17,8 +17,18 @@ public interface PostRepository {
     List<Post> findAll(int page, int size, Category category);
     //삭제
     void deleteById(Long id);
-    //다건 조회를 위한 count.? -> 기본 제공 메서드 아니라서 에러
+    //다건 조회를 위한 count
     long count(Category category);
+
+    //검색 메서드 추가
+    List<Post> searchByTitle(
+            String title,
+            int page,
+            int size,
+            Category category
+    );
+
+    long countByTitle(String title, Category category);
 }
 
 /*세미나 내용 중에 Repository에 어노테이션 붙이는 거 있었는데.. 저는 얘를 인터페이스로 만들고,

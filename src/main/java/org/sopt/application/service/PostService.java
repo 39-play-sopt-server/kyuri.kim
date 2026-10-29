@@ -57,10 +57,26 @@ public class PostService implements PostUseCase {
     @Override
     public PostPage getAllPosts(GetPostsCommand command) {
 
-        List<Post> posts = postRepository.findAll(command.page(), command.size(), command.category());
-        long totalElements = postRepository.count(command.category());
+        boolean hasTitle = command.title() != null
+                && !command.title().isBlank();
 
-        //총 페이지 수 계산
+        List<Post> posts = hasTitle
+                ? postRepository.searchByTitle(
+                command.title(),
+                command.page(),
+                command.size(),
+                command.category()
+        )
+                : postRepository.findAll(
+                command.page(),
+                command.size(),
+                command.category()
+        );
+
+        long totalElements = hasTitle
+                ? postRepository.countByTitle(command.title(), command.category())
+                : postRepository.count(command.category());
+
         int totalPages = (int)Math.ceil((double) totalElements/command.size());
         return new PostPage(posts, command.page(), command.size(), totalElements, totalPages);
     }

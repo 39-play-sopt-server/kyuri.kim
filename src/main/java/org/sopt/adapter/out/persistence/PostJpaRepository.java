@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface PostJpaRepository extends JpaRepository<Post, Long> {
+
     @Override
     @EntityGraph(attributePaths = "member")
     Optional<Post> findById(Long id);
@@ -22,4 +23,24 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
     Page<Post> findByCategory(Category category, Pageable pageable);
 
     long countByCategory(Category category);
+
+    @EntityGraph(attributePaths = "member")
+    Page<Post> findByTitleContainingIgnoreCase(
+            String title,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = "member")
+    Page<Post> findByCategoryAndTitleContainingIgnoreCase(
+            Category category,
+            String title,
+            Pageable pageable
+    );
+
+    long countByTitleContainingIgnoreCase(String title);
+
+    long countByCategoryAndTitleContainingIgnoreCase(
+            Category category,
+            String title
+    );
 }

@@ -73,4 +73,43 @@ public class PostRepositoryAdapter implements PostRepository, LoadPostPort, Save
     public void savePost(Post post) {
         save(post);
     }
+
+    //검색 기능 추가
+    @Override
+    public List<Post> searchByTitle(
+            String title,
+            int page,
+            int size,
+            Category category
+    ) {
+        Sort sort = Sort.by(
+                Sort.Order.desc("createdAt"),
+                Sort.Order.desc("id")
+        );
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        String keyword = title.trim();
+
+        Page<Post> result = category == null
+                ? postJpaRepository.findByTitleContainingIgnoreCase(keyword, pageable)
+                : postJpaRepository.findByCategoryAndTitleContainingIgnoreCase(
+                category,
+                keyword,
+                pageable
+        );
+
+        return result.getContent();
+    }
+
+    @Override
+    public long countByTitle(String title, Category category) {
+        String keyword = title.trim();
+
+        return category == null
+                ? postJpaRepository.countByTitleContainingIgnoreCase(keyword)
+                : postJpaRepository.countByCategoryAndTitleContainingIgnoreCase(
+                category,
+                keyword
+        );
+    }
 }

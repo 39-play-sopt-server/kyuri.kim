@@ -43,11 +43,12 @@ public class PostController implements PostApi {
     public ApiResponse<PostPageResponse> getAllPosts(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "category", required = false) String category)
+            @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name = "title", required = false) String title)
     {
         Category domainCategory = Category.fromNullableString(category);
 
-        PostPage postPage = postUseCase.getAllPosts(new GetPostsCommand(page, size, domainCategory));
+        PostPage postPage = postUseCase.getAllPosts(new GetPostsCommand(page, size, domainCategory, title));
         return ApiResponse.success(PostPageResponse.from(postPage));
     }
 
