@@ -31,16 +31,14 @@ public class Post extends BaseEntity {
 
     protected Post(){}
 
-    private Post(Long id, String title, String content, Member member, Category category, long viewCount) {
+    private Post(String title, String content, Member member, Category category) {
         validateInitial(member, category);
         validateModifiable(title, content);
 
-        this.id = id;
         this.title = title;
         this.content = content;
         this.member = member;
         this.category = category;
-        this.viewCount = viewCount;
     }
 
     public synchronized void increaseViewCount(){ //동시성 방어
@@ -53,19 +51,7 @@ public class Post extends BaseEntity {
             Member member,
             Category category
     ) {
-        return new Post(null, title, content, member, category, 0L);
-    }
-
-    //저장된 데이터를 바탕으로 도메인 객체를 복원할 때에만 사용. 새로운 게시글 생성할 때에는 Create() 팩토리 메서드만 사용.
-    public static Post reconstitute(
-            Long id,
-            String title,
-            String content,
-            Member member,
-            Category category,
-            long viewCount
-    ) {
-        return new Post(id, title, content, member, category, viewCount);
+        return new Post(title, content, member, category);
     }
 
     public void update(String title, String content) {

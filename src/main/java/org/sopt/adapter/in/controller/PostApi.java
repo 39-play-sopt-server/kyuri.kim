@@ -17,10 +17,11 @@ public interface PostApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "새로운 게시글 생성 성공")
     ResponseEntity<ApiResponse<PostResponse>> createPost(CreatePostRequest request);
 
-    @Operation(summary = "게시글 목록 조회", description = "페이징 및 카테고리별 게시글 목록을 조회합니다.")
+    @Operation(summary = "게시글 목록 조회", description = "페이징 및 작성자/카테고리/제목 조건으로 게시글 목록을 조회합니다.")
     ApiResponse<PostPageResponse> getAllPosts(
             @Parameter(description = "페이지 번호", example = "1") int page,
             @Parameter(description = "페이지 사이즈", example = "10") int size,
+            @Parameter(description = "작성자(회원) ID", example = "1") Long memberId,
             @Parameter(description = "카테고리 이름(FREE, INFO, CAREER)", example = "FREE") String category,
             @Parameter(description = "게시글 제목", example = "제목") String title
     );

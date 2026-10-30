@@ -1,6 +1,8 @@
 package org.sopt.domain;
 
 import jakarta.persistence.*;
+import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.MemberErrorCode;
 
 @Entity
 @Table(name = "members")
@@ -19,7 +21,10 @@ public class Member extends BaseEntity{
     protected Member() {
     }
 
+    private static final int MAX_NAME_LENGTH = 50;
+
     private Member(String name) {
+        validateName(name);
         this.name = name;
     }
 
@@ -45,5 +50,14 @@ public class Member extends BaseEntity{
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    private static void validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new BusinessException(MemberErrorCode.EMPTY_MEMBER_NAME);
+        }
+        if (name.length() > MAX_NAME_LENGTH) {
+            throw new BusinessException(MemberErrorCode.MEMBER_NAME_TOO_LONG);
+        }
     }
 }

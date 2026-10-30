@@ -5,6 +5,8 @@ package org.sopt.application.service;
 import org.sopt.application.port.in.*;
 import org.sopt.application.port.out.MemberRepository;
 import org.sopt.application.port.out.PostRepository;
+import org.sopt.application.port.out.PostSearchCondition;
+import org.sopt.application.port.out.PostSearchResult;
 import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.MemberErrorCode;
 import org.sopt.common.exception.PostErrorCode;
@@ -13,9 +15,8 @@ import org.sopt.domain.Post;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
+@Transactional(readOnly = true)
 public class PostService implements PostUseCase {
     //데이터 저장, 조회 담당하는 아웃바운드 포트
     private final PostRepository postRepository;
@@ -33,6 +34,7 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional
     public Post createPost(CreatePostCommand command){
         Member member = memberRepository.findById(command.memberId())
                 .orElseThrow(()->
@@ -55,30 +57,16 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PostPage getAllPosts(GetPostsCommand command) {
+        PostSearchCondition condition = new PostSearchCondition(
+                command.memberId(), command.category(), command.title());
 
-        boolean hasTitle = command.title() != null
-                && !command.title().isBlank();
+        PostSearchResult result = postRepository.search(condition, command.page(), command.size());
 
-        List<Post> posts = hasTitle
-                ? postRepository.searchByTitle(
-                command.title(),
-                command.page(),
-                command.size(),
-                command.category()
-        )
-                : postRepository.findAll(
-                command.page(),
-                command.size(),
-                command.category()
-        );
-
-        long totalElements = hasTitle
-                ? postRepository.countByTitle(command.title(), command.category())
-                : postRepository.count(command.category());
-
-        int totalPages = (int)Math.ceil((double) totalElements/command.size());
-        return new PostPage(posts, command.page(), command.size(), totalElements, totalPages);
+        int totalPages = (int) Math.ceil((double) result.totalElements() / command.size());
+        return new PostPage(result.posts(), command.page(), command.size(),
+                result.totalElements(), totalPages);
     }
 
     @Override
@@ -91,10 +79,10 @@ public class PostService implements PostUseCase {
     public void updatePost(Long id, UpdatePostCommand command) {
         Post post = findPostById(id);
         post.update(command.title(), command.content());
-        postRepository.save(post);
     }
 
     @Override
+    @Transactional
     public void deletePost(Long id) {
         findPostById(id);
         postRepository.deleteById(id);
