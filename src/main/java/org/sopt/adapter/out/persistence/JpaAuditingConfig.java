@@ -6,6 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @Configuration
-@EnableJpaAuditing(modifyOnCreation = false)
+@EnableJpaAuditing(modifyOnCreate = false)
 public class JpaAuditingConfig {
 }
