@@ -36,13 +36,13 @@ public class PostService implements PostUseCase {
     @Override
     @Transactional
     public Post createPost(CreatePostCommand command){
-        Member member = memberRepository.findById(command.memberId())
-                .orElseThrow(()->
-                        new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-        if (member.isDeleted()) {
-            throw new BusinessException(MemberErrorCode.MEMBER_WITHDRAWN);
+        if (command.memberId() == null) {
+            throw new BusinessException(PostErrorCode.EMPTY_POST_WRITER);   // 이것만 바꾸기
         }
+
+        Member member = memberRepository.findById(command.memberId())
+                .orElseThrow(() ->
+                        new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         //1. 게시글 생성 정적 팩토리 메서드
         Post post = Post.create(

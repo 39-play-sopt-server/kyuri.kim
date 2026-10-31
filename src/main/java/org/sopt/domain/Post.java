@@ -41,10 +41,6 @@ public class Post extends BaseEntity {
         this.category = category;
     }
 
-    public synchronized void increaseViewCount(){ //동시성 방어
-        this.viewCount ++;
-    }
-
     public static Post create(
             String title,
             String content,
@@ -96,6 +92,5 @@ public class Post extends BaseEntity {
     public String getContent() { return content;}
     public Member getMember() { return member;}
     public Category getCategory() { return category;}
-    public synchronized long getViewCount(){return this.viewCount;}
-
+    public long getViewCount(){return this.viewCount;}
 }
