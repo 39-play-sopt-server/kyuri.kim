@@ -24,7 +24,7 @@ public class PostSpecifications {
                 predicates.add(cb.equal(root.get("category"), category));
             }
             if (title != null && !title.isBlank()) {
-                String pattern = "%" + escapeLike(title.trim()) + "%";
+                String pattern = escapeLike(title.trim()) + "%";
                 predicates.add(cb.like(root.get("title"), pattern, '!'));
             }
 

@@ -5,6 +5,7 @@ import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.PostErrorCode;
 
 @Entity
+@Table(indexes = @Index(name = "idx_post_title", columnList = "title"))
 public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
