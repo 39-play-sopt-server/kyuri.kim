@@ -3,21 +3,28 @@ package org.sopt.application.service;
 //입력 포트를 구현하고, 출력포트를 사용하는 파일 -> 유스케이스 구현체
 
 import org.sopt.application.port.in.*;
+import org.sopt.application.port.out.MemberRepository;
 import org.sopt.application.port.out.PostRepository;
+import org.sopt.application.port.out.PostSearchCondition;
+import org.sopt.application.port.out.PostSearchResult;
 import org.sopt.common.exception.BusinessException;
+import org.sopt.common.exception.MemberErrorCode;
 import org.sopt.common.exception.PostErrorCode;
+import org.sopt.domain.Member;
 import org.sopt.domain.Post;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class PostService implements PostUseCase {
     //데이터 저장, 조회 담당하는 아웃바운드 포트
     private final PostRepository postRepository;
+    private final MemberRepository memberRepository;
 
-    public PostService(PostRepository postRepository){
+    public PostService(PostRepository postRepository, MemberRepository memberRepository){
         this.postRepository = postRepository;
+        this.memberRepository = memberRepository;
     }
 
     //조회랑 예외 처리 하나로 묶어내기
@@ -27,12 +34,21 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional
     public Post createPost(CreatePostCommand command){
+        if (command.memberId() == null) {
+            throw new BusinessException(PostErrorCode.EMPTY_POST_WRITER);   // 이것만 바꾸기
+        }
+
+        Member member = memberRepository.findById(command.memberId())
+                .orElseThrow(() ->
+                        new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
+
         //1. 게시글 생성 정적 팩토리 메서드
         Post post = Post.create(
                 command.title(),
                 command.content(),
-                command.writer(),
+                member,
                 command.category()
         );
 
@@ -41,15 +57,16 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PostPage getAllPosts(GetPostsCommand command) {
+        PostSearchCondition condition = new PostSearchCondition(
+                command.memberId(), command.category(), command.title());
 
-        List<Post> posts = postRepository.findAll(command.page(), command.size(), command.category());
-        long totalElements = postRepository.count(command.category());
+        PostSearchResult result = postRepository.search(condition, command.page(), command.size());
 
-        //총 페이지 수 계산
-        int totalPages = (int)Math.ceil((double) totalElements/command.size());
-
-        return new PostPage(posts, command.page(), command.size(), totalElements, totalPages);
+        int totalPages = (int) Math.ceil((double) result.totalElements() / command.size());
+        return new PostPage(result.posts(), command.page(), command.size(),
+                result.totalElements(), totalPages);
     }
 
     @Override
@@ -58,26 +75,16 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional
     public void updatePost(Long id, UpdatePostCommand command) {
         Post post = findPostById(id);
         post.update(command.title(), command.content());
-        postRepository.save(post);
     }
 
     @Override
+    @Transactional
     public void deletePost(Long id) {
         findPostById(id);
-        postRepository.delete(id);
+        postRepository.deleteById(id);
     }
 }
-
-
-/*
-* 1. @Service란
-* - 서비스 역할을 하는 클래스(위에서는 게시글 생성이라는 비즈니스 로직 처리)임을 스프링에게 알려줌
-* -> Bean으로 등록 -> Spring이 알아서 객체 만들어서 넣어줌
-* => 의존성 주입 (DI)
-*
-* 2. @Override란
-* - 부모에 있던 메서드를 재정의
-* */

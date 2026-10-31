@@ -1,0 +1,62 @@
+
+[헥사고날 구조]
+adapter/in >>   application (유스케이스 + 포트)
+                domain (엔티티, 규칙)           << adapter/out
+
+- adapter/in : 외부 요청을 받아 안쪽으로 전달하는 애
+- appication : 유스케이스와 그 절차
+- domain : 비즈니스 규칙과 데이터 모양
+- adapter/out : DB 같은 외부 저장소왕의 연결
+- common : 모두가 쓰는 공통 도구 (예외, 응답,,)
+
+1. domain -> 가장 안쪽. 외부를 몰라야 함
+- BaseEntity: createdAt, updatedAt (모든 엔티티가 물려받음), 테이블이 없는 MappedSuperclass
+- Post : 게시글 엔티티. 멤버 참조 LAZY. 제목/내용 길이 검증, update()
+- Member : 회원 엔티티. withdraw() 소프트 딜리트로 구현함 >> getDisplayName()으로 "탈퇴한 사용자"로 바꾸기
+- Category : 게시판 종류 enum.
+
+2. application -> "무엇을 할 수 있는지(유스케이스)"
+2-1. port/in : 바깥이 안쪽을 부름
+(UseCase)
+- PostuseCase : 게시글을 만든다/조회한다
+- MemberUseCase : 회원을 만든다/탈퇴시킨다
+- IncreasePostViewCountUseCase : 조회수를 올린다
+
+(Command) 컨트롤러사 서비스에 넘기는 입력 규격(?)
+- GetPostsCommand -> 페이지 범위 검증 넣기
+
+(PostPage) 서비스가 반환하는 "게시글 목록 + 페이지 정보"
+
+2-2. port/out : 안쪽이 바깥을 부름
+(Repository)
+- PostRepository : 게시글을 저장하고 찾는다
+- MemberRepository : 회원을 저장하고 찾는다
+
+- IncreaseViewCount : 저장소에서 조회수를 올린다
+- PostSeachCOndition : 검색 조건
+- PostSearchResult : 내용 + 전체 개수 (결과)
+
+2-3. service : 유스케이스 구현체 = 실제 절차
+- PostService : 게시글 CRUD. 트랜잭션 경계
+- MemberService : 회원 생성/탈퇴
+- PostViewCountService : 조회수 증가싴키기
+
+3. adapter
+3-1. adapter/in : HTTP 쪽 입구
+- PostController, MemberController : URL 매핑, 요청은 Command로 바꿔서 유스케이스 호출하기, 응답은 포장하기
+- PostApi, MemberApi : 컨트롤러가 구현하는 인터페이스,, swagger 문서 어노테이션 뭉쳐놓기
+- dto/request~ : 요청 어떻게 보내는지. toCommand()로 안쪽 입력하도록
+- dto/response~ : 응답 어떻게 보내는지. from(entity)로 엔티티를 DTO로 변환하기 (탈퇴 회원 이름도 여기서 처리)
+- exception/GlobalExceptionhandler : ApiResponse 에러로 예외를 변환하기
+
+3-2. adapter/out/persistence  : DB쪽 출구
+- Post/MemberJPARepository : JPA 인터페이스. EntityGraph.. Modifying
+- Post/MemberRepositoryAdapter : 아웃바운드 포트 구현해서 JPA로 연결하기 + 페이지 번호 (1->0)으로 + 정렬
+- PostSpecifications : 동적 검색 조건 (작성자, 카테고리, 제목)
+- JpaAuditingConfig : 감사 기능 켜기
+
+4. common
+- BusinessException
+- ErrorCode : 비즈니스 예외, 에러 코드 규격
+- Post/Member/GlobalErrorCode : 도메인별 에러코드 목록 (HTTP + 코드 + 메시지)로 통일하기
+- ApiResponse : 성공/실패 공통 응답
