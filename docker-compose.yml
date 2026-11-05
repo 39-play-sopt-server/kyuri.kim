@@ -11,6 +11,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   app:
     image: ${DOCKERHUB_USERNAME}/assignment:latest   # ← 이 줄
@@ -23,6 +24,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    restart: unless-stopped
 
   nginx:
     image: nginx:1.27
@@ -37,6 +39,7 @@ services:
       - ./certbot/www:/var/www/certbot:ro
     depends_on:
       - app
+    restart: unless-stopped
 
   certbot:
     image: certbot/certbot
