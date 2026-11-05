@@ -26,11 +26,13 @@ services:
 
   nginx:
     image: nginx:1.27
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/${NGINX_CONF:-http-only}.conf.template:/etc/nginx/templates/default.conf.template:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
     depends_on:

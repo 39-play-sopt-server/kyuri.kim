@@ -5,6 +5,8 @@ build/
 !**/src/test/**/build/
 .kotlin
 .env
+.idea/workspace.xml
+.idea/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -42,3 +44,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+certbot/
