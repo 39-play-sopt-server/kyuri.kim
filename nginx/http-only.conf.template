@@ -1,0 +1,18 @@
+# 1단계: 인증서 발급 전용 (HTTP만). NGINX_CONF=http-only (기본값)
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    # Let's Encrypt가 도메인 소유를 확인하는 경로
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://app:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
