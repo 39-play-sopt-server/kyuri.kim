@@ -1,4 +1,4 @@
-package org.sopt.adapter.in.dto;
+package org.sopt.adapter.in.dto.response;
 
 import org.sopt.application.port.in.PostPage;
 

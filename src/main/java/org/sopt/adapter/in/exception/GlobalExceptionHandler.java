@@ -1,5 +1,7 @@
 package org.sopt.adapter.in.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sopt.common.exception.BusinessException;
 import org.sopt.common.exception.ErrorCode;
 import org.sopt.common.exception.GlobalErrorCode;
@@ -61,8 +63,11 @@ public class GlobalExceptionHandler {
     }
 
     // 6. 그 외 (500)
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        log.error("기타 예외", e);
         ErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity
                 .status(errorCode.getStatus())

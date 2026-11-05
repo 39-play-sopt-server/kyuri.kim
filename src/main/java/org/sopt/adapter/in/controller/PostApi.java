@@ -3,23 +3,27 @@ package org.sopt.adapter.in.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.sopt.adapter.in.dto.CreatePostRequest;
-import org.sopt.adapter.in.dto.PostPageResponse;
-import org.sopt.adapter.in.dto.PostResponse;
-import org.sopt.adapter.in.dto.UpdatePostRequest;
+import org.sopt.adapter.in.dto.request.CreatePostRequest;
+import org.sopt.adapter.in.dto.response.PostPageResponse;
+import org.sopt.adapter.in.dto.response.PostResponse;
+import org.sopt.adapter.in.dto.request.UpdatePostRequest;
 import org.sopt.common.response.ApiResponse;
+import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Post", description = "게시글 API")
 public interface PostApi {
 
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
-    ApiResponse<PostResponse> createPost(CreatePostRequest request);
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "새로운 게시글 생성 성공")
+    ResponseEntity<ApiResponse<PostResponse>> createPost(CreatePostRequest request);
 
-    @Operation(summary = "게시글 목록 조회", description = "페이징 및 카테고리별 게시글 목록을 조회합니다.")
+    @Operation(summary = "게시글 목록 조회", description = "페이징 및 작성자/카테고리/제목 조건으로 게시글 목록을 조회합니다.")
     ApiResponse<PostPageResponse> getAllPosts(
             @Parameter(description = "페이지 번호", example = "1") int page,
             @Parameter(description = "페이지 사이즈", example = "10") int size,
-            @Parameter(description = "카테고리 이름(FREE, INFO, CAREER)", example = "FREE") String category
+            @Parameter(description = "작성자(회원) ID", example = "1") Long memberId,
+            @Parameter(description = "카테고리 이름(FREE, INFO, CAREER)", example = "FREE") String category,
+            @Parameter(description = "게시글 제목 (앞부분이 일치하는 게시글 검색)", example = "스프링") String title
     );
 
     @Operation(summary = "게시글 상세 조회", description = "해당 게시글의 상세 정보를 조회하고 조회수를 1 증가시킵니다.")
