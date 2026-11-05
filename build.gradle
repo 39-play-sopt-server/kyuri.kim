@@ -34,3 +34,7 @@ tasks.withType(JavaCompile) {
 tasks.withType(JavaExec) {
     jvmArgs '-Dfile.encoding=UTF-8'
 }
+
+bootJar {
+    archiveFileName = 'app.jar'
+}
