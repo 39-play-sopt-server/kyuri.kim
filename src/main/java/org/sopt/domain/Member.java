@@ -15,6 +15,12 @@ public class Member extends BaseEntity{
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Column(nullable=false, unique=true)
+    private String email;
+
+    @Column(nullable=false)
+    private String password;
+
     @Column(nullable = false)
     private boolean deleted = false;
 
@@ -23,13 +29,15 @@ public class Member extends BaseEntity{
 
     private static final int MAX_NAME_LENGTH = 50;
 
-    private Member(String name) {
+    private Member(String name, String email, String password) {
         validateName(name);
         this.name = name;
+        this.email=email;
+        this.password=password;
     }
 
-    public static Member create(String name) {
-        return new Member(name);
+    public static Member create(String name, String email, String password) {
+        return new Member(name, email, password);
     }
 
     public void withdraw() {

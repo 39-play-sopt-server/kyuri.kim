@@ -7,6 +7,7 @@ import org.sopt.common.response.ApiResponse;
 import org.sopt.domain.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,6 +33,12 @@ public class MemberController implements MemberApi {
                         HttpStatus.CREATED.value(),
                         MemberResponse.from(member)
                 ));
+    }
+
+    @GetMapping("/me")
+    @Override
+    public ResponseEntity<Long> me(@AuthenticationPrincipal Long memberId) {
+        return ResponseEntity.ok(memberId);
     }
 
     @Override
