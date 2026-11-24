@@ -13,7 +13,7 @@ public interface PostUseCase {
     //상세
     Post getPostById(Long id);
     //수정
-    void updatePost(Long id, UpdatePostCommand command);
+    void updatePost(Long id, Long requesterId, UpdatePostCommand command);
     //삭제
-    void deletePost(Long id);
+    void deletePost(Long id, Long requesterId);
 }

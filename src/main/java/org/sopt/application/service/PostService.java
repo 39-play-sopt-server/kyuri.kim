@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class PostService implements PostUseCase {
-    //데이터 저장, 조회 담당하는 아웃바운드 포트
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
 
@@ -27,7 +26,6 @@ public class PostService implements PostUseCase {
         this.memberRepository = memberRepository;
     }
 
-    //조회랑 예외 처리 하나로 묶어내기
     private Post findPostById(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
@@ -37,14 +35,17 @@ public class PostService implements PostUseCase {
     @Transactional
     public Post createPost(CreatePostCommand command){
         if (command.memberId() == null) {
-            throw new BusinessException(PostErrorCode.EMPTY_POST_WRITER);   // 이것만 바꾸기
+            throw new BusinessException(PostErrorCode.EMPTY_POST_WRITER);
         }
 
         Member member = memberRepository.findById(command.memberId())
                 .orElseThrow(() ->
                         new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        //1. 게시글 생성 정적 팩토리 메서드
+        if (member.isDeleted()) {
+            throw new BusinessException(MemberErrorCode.MEMBER_WITHDRAWN);
+        }
+
         Post post = Post.create(
                 command.title(),
                 command.content(),
@@ -52,7 +53,6 @@ public class PostService implements PostUseCase {
                 command.category()
         );
 
-        //2. 저장하고 결과 반환
         return postRepository.save(post);
     }
 
@@ -76,15 +76,23 @@ public class PostService implements PostUseCase {
 
     @Override
     @Transactional
-    public void updatePost(Long id, UpdatePostCommand command) {
+    public void updatePost(Long id, Long requesterId, UpdatePostCommand command) {
         Post post = findPostById(id);
+        validateOwner(post, requesterId);
         post.update(command.title(), command.content());
     }
 
     @Override
     @Transactional
-    public void deletePost(Long id) {
-        findPostById(id);
+    public void deletePost(Long id, Long requesterId) {
+        Post post = findPostById(id);
+        validateOwner(post, requesterId);
         postRepository.deleteById(id);
+    }
+
+    private void validateOwner(Post post, Long requesterId) {
+        if (!post.getMember().getId().equals(requesterId)) {
+            throw new BusinessException(PostErrorCode.NOT_POST_OWNER);
+        }
     }
 }

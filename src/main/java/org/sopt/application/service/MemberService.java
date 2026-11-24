@@ -32,7 +32,10 @@ public class MemberService implements MemberUseCase {
                 .orElseThrow(() ->
                         new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        member.withdraw();
-        memberRepository.save(member);
+        if (member.isDeleted()) {
+            throw new BusinessException(MemberErrorCode.ALREADY_WITHDRAWN);
+        }
+
+        member.withdraw(); //@Transactional + dirty checking이 자동 UPDATE
     }
 }

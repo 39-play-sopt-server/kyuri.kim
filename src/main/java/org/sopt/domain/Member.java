@@ -6,7 +6,7 @@ import org.sopt.common.exception.MemberErrorCode;
 
 @Entity
 @Table(name = "members")
-public class Member extends BaseEntity{
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,11 +15,18 @@ public class Member extends BaseEntity{
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable=false, unique=true)
+    @Column(unique = true, length = 254)
     private String email;
 
-    @Column(nullable=false)
-    private String password;
+    @Column(name = "password_hash")
+    private String passwordHash;
+
+    @Column(unique = true, length = 255)
+    private String kakaoId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role = Role.ROLE_USER;
 
     @Column(nullable = false)
     private boolean deleted = false;
@@ -29,15 +36,26 @@ public class Member extends BaseEntity{
 
     private static final int MAX_NAME_LENGTH = 50;
 
-    private Member(String name, String email, String password) {
+    private Member(String name) {
         validateName(name);
         this.name = name;
-        this.email=email;
-        this.password=password;
     }
 
-    public static Member create(String name, String email, String password) {
-        return new Member(name, email, password);
+    public static Member create(String name) {
+        return new Member(name);
+    }
+
+    public static Member register(String name, String email, String passwordHash) {
+        Member member = new Member(name);
+        member.email = email;
+        member.passwordHash = passwordHash;
+        return member;
+    }
+
+    public static Member social(String name, String kakaoId) {
+        Member member = new Member(name);
+        member.kakaoId = kakaoId;
+        return member;
     }
 
     public void withdraw() {
@@ -58,6 +76,26 @@ public class Member extends BaseEntity{
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public String getKakaoId() {
+        return kakaoId;
+    }
+
+    public void grantAdmin() {
+        this.role = Role.ROLE_ADMIN;
     }
 
     private static void validateName(String name) {

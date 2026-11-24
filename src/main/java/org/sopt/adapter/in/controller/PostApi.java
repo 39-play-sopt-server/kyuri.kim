@@ -15,7 +15,7 @@ public interface PostApi {
 
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "새로운 게시글 생성 성공")
-    ResponseEntity<ApiResponse<PostResponse>> createPost(CreatePostRequest request);
+    ResponseEntity<ApiResponse<PostResponse>> createPost(CreatePostRequest request, org.springframework.security.oauth2.jwt.Jwt jwt);
 
     @Operation(summary = "게시글 목록 조회", description = "페이징 및 작성자/카테고리/제목 조건으로 게시글 목록을 조회합니다.")
     ApiResponse<PostPageResponse> getAllPosts(
@@ -30,10 +30,8 @@ public interface PostApi {
     ApiResponse<PostResponse> getPostById(Long id);
 
     @Operation(summary = "게시글 수정", description = "해당 게시글을 수정합니다.")
-    ApiResponse<Void> updatePost(
-            Long id, UpdatePostRequest request
-    );
+    ApiResponse<Void> updatePost(Long id, UpdatePostRequest request, org.springframework.security.oauth2.jwt.Jwt jwt);
 
     @Operation(summary = "게시글 삭제", description = "해당 게시글을 삭제합니다.")
-    ApiResponse<Void> deletePost(Long id);
+    ApiResponse<Void> deletePost(Long id, org.springframework.security.oauth2.jwt.Jwt jwt);
 }
