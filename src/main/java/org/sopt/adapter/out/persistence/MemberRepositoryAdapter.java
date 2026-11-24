@@ -26,7 +26,19 @@ public class MemberRepositoryAdapter implements MemberRepository {
     public Optional<Member> findById(Long id) {
         return memberJpaRepository.findById(id);
     }
-    @Override public Optional<Member> findByEmail(String email) { return memberJpaRepository.findByEmail(email); }
-    @Override public Optional<Member> findByKakaoId(String kakaoId) { return memberJpaRepository.findByKakaoId(kakaoId); }
-    @Override public Page<Member> findAll(Pageable pageable) { return memberJpaRepository.findAll(pageable); }
+
+    @Override
+    public Optional<Member> findByEmail(String email) {
+        return memberJpaRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<Member> findByKakaoId(String kakaoId) {
+        return memberJpaRepository.findByKakaoId(kakaoId);
+    }
+
+    @Override
+    public Page<Member> findAll(Pageable pageable) {
+        return memberJpaRepository.findAll(pageable);
+    }
 }

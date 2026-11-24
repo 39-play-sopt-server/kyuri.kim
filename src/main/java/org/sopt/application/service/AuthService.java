@@ -6,7 +6,6 @@ import org.sopt.common.exception.MemberErrorCode;
 import org.sopt.domain.Member;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,16 +15,15 @@ public class AuthService {
     private final MemberRepository members;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokens;
-    private final JwtDecoder jwtDecoder;
 
-    public AuthService(MemberRepository members,
-                       PasswordEncoder passwordEncoder,
-                       TokenService tokens,
-                       JwtDecoder jwtDecoder) {
+    public AuthService(
+            MemberRepository members,
+            PasswordEncoder passwordEncoder,
+            TokenService tokens
+    ) {
         this.members = members;
         this.passwordEncoder = passwordEncoder;
         this.tokens = tokens;
-        this.jwtDecoder = jwtDecoder;
     }
 
     @Transactional
@@ -58,7 +56,7 @@ public class AuthService {
         return tokens.issue(member);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenService.IssuedTokenPair socialLogin(String kakaoId, String nickname) {
         Member member = members.findByKakaoId(kakaoId)
                 .orElseGet(() -> members.save(
@@ -77,8 +75,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public TokenService.IssuedTokenPair refresh(String rawToken) {
-        Jwt jwt = decodeRefresh(rawToken);
-
+        Jwt jwt = tokens.decodeRefreshToken(rawToken);
         Member member = members.findById(Long.valueOf(jwt.getSubject()))
                 .orElseThrow(() -> new BusinessException(MemberErrorCode.INVALID_REFRESH_TOKEN));
 
@@ -87,21 +84,6 @@ public class AuthService {
         }
 
         return tokens.issue(member);
-    }
-
-    // private 메서드에는 AOP 프록시가 적용 안 됨
-    private Jwt decodeRefresh(String raw) {
-        try {
-            Jwt jwt = jwtDecoder.decode(raw);
-            if (!"refresh".equals(jwt.getClaimAsString("token_use"))) {
-                throw new BusinessException(MemberErrorCode.INVALID_REFRESH_TOKEN);
-            }
-            return jwt;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new BusinessException(MemberErrorCode.INVALID_REFRESH_TOKEN);
-        }
     }
 
     private String normalizeEmail(String email) {
