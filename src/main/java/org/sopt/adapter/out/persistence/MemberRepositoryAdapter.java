@@ -5,6 +5,8 @@ import org.sopt.domain.Member;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Component
 public class MemberRepositoryAdapter implements MemberRepository {
@@ -24,4 +26,6 @@ public class MemberRepositoryAdapter implements MemberRepository {
     public Optional<Member> findById(Long id) {
         return memberJpaRepository.findById(id);
     }
+    @Override public Optional<Member> findByEmail(String email) { return memberJpaRepository.findByEmail(email); }
+    @Override public Page<Member> findAll(Pageable pageable) { return memberJpaRepository.findAll(pageable); }
 }

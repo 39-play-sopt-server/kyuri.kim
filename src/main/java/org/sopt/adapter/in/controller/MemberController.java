@@ -3,6 +3,9 @@ package org.sopt.adapter.in.controller;
 import org.sopt.adapter.in.dto.request.CreateMemberRequest;
 import org.sopt.adapter.in.dto.response.MemberResponse;
 import org.sopt.application.port.in.MemberUseCase;
+import org.sopt.application.service.AuthService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.sopt.common.response.ApiResponse;
 import org.sopt.domain.Member;
 import org.springframework.http.HttpStatus;
@@ -14,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController implements MemberApi {
 
     private final MemberUseCase memberUseCase;
+    private final AuthService authService;
 
-    public MemberController(MemberUseCase memberUseCase) {
+    public MemberController(MemberUseCase memberUseCase, AuthService authService) {
         this.memberUseCase = memberUseCase;
+        this.authService = authService;
     }
 
     @Override
@@ -35,11 +40,12 @@ public class MemberController implements MemberApi {
     }
 
     @Override
-    @DeleteMapping("/{memberId}")
-    public ApiResponse<Void> withdrawMember(
-            @PathVariable Long memberId
+    @DeleteMapping("/me")
+    public ApiResponse<Void> withdrawMember(@AuthenticationPrincipal Jwt jwt
     ) {
+        Long memberId=Long.valueOf(jwt.getSubject());
         memberUseCase.withdrawMember(memberId);
+        authService.revokeAll(memberId);
         return ApiResponse.success(null);
     }
 }

@@ -9,5 +9,5 @@ public interface MemberApi {
     ResponseEntity<ApiResponse<MemberResponse>> createMember(
             CreateMemberRequest request
     );
-    ApiResponse<Void> withdrawMember(Long memberId);
+    ApiResponse<Void> withdrawMember(org.springframework.security.oauth2.jwt.Jwt jwt);
 }

@@ -15,6 +15,16 @@ public class Member extends BaseEntity{
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Column(unique = true, length = 254)
+    private String email;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role = Role.ROLE_USER;
+
     @Column(nullable = false)
     private boolean deleted = false;
 
@@ -29,6 +39,17 @@ public class Member extends BaseEntity{
     }
 
     public static Member create(String name) {
+        return new Member(name);
+    }
+
+    public static Member register(String name, String email, String passwordHash) {
+        Member member = new Member(name);
+        member.email = email;
+        member.passwordHash = passwordHash;
+        return member;
+    }
+
+    public static Member social(String name) {
         return new Member(name);
     }
 
@@ -51,6 +72,10 @@ public class Member extends BaseEntity{
     public boolean isDeleted() {
         return deleted;
     }
+    public String getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public Role getRole() { return role; }
+    public void grantAdmin() { this.role = Role.ROLE_ADMIN; }
 
     private static void validateName(String name) {
         if (name == null || name.isBlank()) {
