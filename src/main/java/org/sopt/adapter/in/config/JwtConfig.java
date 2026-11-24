@@ -5,10 +5,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.sopt.adapter.in.security.SessionStatusJwtValidator;
-import org.sopt.adapter.out.persistence.AuthSessionJpaRepository;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
@@ -20,15 +16,9 @@ public class JwtConfig {
         return new NimbusJwtEncoder(new ImmutableSecret<>(key(secret)));
     }
     @Bean
-    JwtDecoder jwtDecoder(@Value("${app.jwt.secret}") String secret, @Value("${app.jwt.issuer}") String issuer) {
+    JwtDecoder jwtDecoder(@Value("${app.jwt.secret}") String secret) {
         NimbusJwtDecoder decoder=NimbusJwtDecoder.withSecretKey(key(secret)).macAlgorithm(MacAlgorithm.HS256).build();
-        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(issuer));
-        return decoder;
-    }
-    @Bean("accessJwtDecoder")
-    JwtDecoder accessJwtDecoder(@Value("${app.jwt.secret}") String secret, @Value("${app.jwt.issuer}") String issuer, AuthSessionJpaRepository sessions) {
-        NimbusJwtDecoder decoder=NimbusJwtDecoder.withSecretKey(key(secret)).macAlgorithm(MacAlgorithm.HS256).build();
-        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefaultWithIssuer(issuer), new SessionStatusJwtValidator(sessions)));
+        decoder.setJwtValidator(JwtValidators.createDefault());
         return decoder;
     }
     private SecretKey key(String secret) {

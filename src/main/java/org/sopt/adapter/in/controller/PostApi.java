@@ -30,9 +30,7 @@ public interface PostApi {
     ApiResponse<PostResponse> getPostById(Long id);
 
     @Operation(summary = "게시글 수정", description = "해당 게시글을 수정합니다.")
-    ApiResponse<Void> updatePost(
-            Long id, UpdatePostRequest request, org.springframework.security.oauth2.jwt.Jwt jwt
-    );
+    ApiResponse<Void> updatePost(Long id, UpdatePostRequest request, org.springframework.security.oauth2.jwt.Jwt jwt);
 
     @Operation(summary = "게시글 삭제", description = "해당 게시글을 삭제합니다.")
     ApiResponse<Void> deletePost(Long id, org.springframework.security.oauth2.jwt.Jwt jwt);

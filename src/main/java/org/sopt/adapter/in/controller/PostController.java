@@ -30,16 +30,14 @@ public class PostController implements PostApi {
         this.increasePostViewCountUseCase = increasePostViewCountUseCase;
     }
 
-    // 1. 생성
     @Override
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponse>> createPost
     (@RequestBody CreatePostRequest request, @AuthenticationPrincipal Jwt jwt) {
-        Post post = postUseCase.createPost(new CreatePostCommand(request.title(), request.content(), Long.valueOf(jwt.getSubject()), Category.fromString(request.category())));
+        Post post = postUseCase.createPost(request.toCommand(Long.valueOf(jwt.getSubject())));
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), PostResponse.from(post)));
     }
 
-    //2. 목록
     @Override
     @GetMapping
     public ApiResponse<PostPageResponse> getAllPosts(
@@ -56,7 +54,6 @@ public class PostController implements PostApi {
         return ApiResponse.success(PostPageResponse.from(postPage));
     }
 
-    // 3. 상세
     @Override
     @GetMapping (path = "/{postId}")
     public ApiResponse<PostResponse> getPostById(
@@ -66,21 +63,22 @@ public class PostController implements PostApi {
             return ApiResponse.success(PostResponse.from(post));
         }
 
-    // 4. 수정
     @Override
     @PutMapping(path = "/{postId}")
     public ApiResponse<Void> updatePost(
-            @PathVariable(name = "postId") Long id, @RequestBody UpdatePostRequest request, @AuthenticationPrincipal Jwt jwt) {
+            @PathVariable(name = "postId") Long id,
+            @RequestBody UpdatePostRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         postUseCase.updatePost(id, Long.valueOf(jwt.getSubject()), request.toCommand());
         return ApiResponse.success(null);
     }
 
-    // 5. 삭제
     @Override
     @DeleteMapping(path = "/{postId}")
     public ApiResponse<Void> deletePost(
-            @PathVariable(name = "postId") Long id, @AuthenticationPrincipal Jwt jwt) {
-            postUseCase.deletePost(id, Long.valueOf(jwt.getSubject()));
-            return ApiResponse.success(null);
-        }
+            @PathVariable(name = "postId") Long id,
+            @AuthenticationPrincipal Jwt jwt) {
+        postUseCase.deletePost(id, Long.valueOf(jwt.getSubject()));
+        return ApiResponse.success(null);
+    }
 }

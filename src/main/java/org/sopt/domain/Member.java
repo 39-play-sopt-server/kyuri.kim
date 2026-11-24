@@ -21,6 +21,9 @@ public class Member extends BaseEntity{
     @Column(name = "password_hash")
     private String passwordHash;
 
+    @Column(unique = true, length = 255)
+    private String kakaoId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role = Role.ROLE_USER;
@@ -49,8 +52,10 @@ public class Member extends BaseEntity{
         return member;
     }
 
-    public static Member social(String name) {
-        return new Member(name);
+    public static Member social(String name, String kakaoId) {
+        Member member = new Member(name);
+        member.kakaoId = kakaoId;
+        return member;
     }
 
     public void withdraw() {
@@ -75,6 +80,7 @@ public class Member extends BaseEntity{
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
     public Role getRole() { return role; }
+    public String getKakaoId() { return kakaoId; }
     public void grantAdmin() { this.role = Role.ROLE_ADMIN; }
 
     private static void validateName(String name) {

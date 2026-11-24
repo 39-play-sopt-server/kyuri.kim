@@ -25,8 +25,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<TokenResponse>> refresh(@CookieValue(name="refresh_token") String refreshToken) { return tokenResponse(authService.refresh(refreshToken)); }
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue(name="refresh_token", required=false) String refreshToken) {
-        if(refreshToken != null) authService.logout(refreshToken);
+    public ResponseEntity<ApiResponse<Void>> logout() {
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, expiredCookie().toString()).body(ApiResponse.success(null));
     }
     private ResponseEntity<ApiResponse<TokenResponse>> tokenResponse(TokenService.IssuedTokenPair pair) {

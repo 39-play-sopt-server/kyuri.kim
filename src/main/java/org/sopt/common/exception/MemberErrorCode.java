@@ -10,7 +10,7 @@ public enum MemberErrorCode implements ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "MEMBER-005", "이미 사용 중인 이메일입니다"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER-006", "이메일 또는 비밀번호가 올바르지 않습니다"),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "MEMBER-007", "유효하지 않은 Refresh Token입니다"),
-    FORBIDDEN_POST_ACCESS(HttpStatus.FORBIDDEN, "MEMBER-008", "게시글을 수정하거나 삭제할 권한이 없습니다");
+    ALREADY_WITHDRAWN(HttpStatus.NOT_FOUND, "MEMBER-008", "이미 탈퇴한 회원입니다");
 
     private final HttpStatus status;
     private final String code;
