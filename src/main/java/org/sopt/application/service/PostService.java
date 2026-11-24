@@ -43,6 +43,9 @@ public class PostService implements PostUseCase {
         Member member = memberRepository.findById(command.memberId())
                 .orElseThrow(() ->
                         new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
+        if (member.isDeleted()) {
+            throw new BusinessException(MemberErrorCode.MEMBER_WITHDRAWN);
+        }
 
         //1. 게시글 생성 정적 팩토리 메서드
         Post post = Post.create(
@@ -76,15 +79,20 @@ public class PostService implements PostUseCase {
 
     @Override
     @Transactional
-    public void updatePost(Long id, UpdatePostCommand command) {
+    public void updatePost(Long id, Long memberId, UpdatePostCommand command) {
         Post post = findPostById(id);
+        verifyOwner(post, memberId);
         post.update(command.title(), command.content());
     }
 
     @Override
     @Transactional
-    public void deletePost(Long id) {
-        findPostById(id);
+    public void deletePost(Long id, Long memberId) {
+        Post post = findPostById(id);
+        verifyOwner(post, memberId);
         postRepository.deleteById(id);
+    }
+    private void verifyOwner(Post post, Long memberId) {
+        if (!post.getMember().getId().equals(memberId)) throw new BusinessException(MemberErrorCode.FORBIDDEN_POST_ACCESS);
     }
 }
